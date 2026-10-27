@@ -7,7 +7,7 @@ name = "blocwerk-contracts"
 dynamic = ["version"]
 description = "Pydantic models of the Blocwerk runner and compute-worker protocol (generated from the JSON Schemas)."
 readme = "README.md"
-license = "AGPL-3.0-only"
+license = "AGPL-3.0-or-later"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = ["pydantic>=2.7,<3"]

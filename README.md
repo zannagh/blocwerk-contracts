@@ -81,4 +81,4 @@ GitHub Packages, builds the wheel, and creates the GitHub release with the wheel
 
 ## License
 
-AGPL-3.0, like Blocwerk. See [LICENSE](LICENSE).
+AGPL-3.0-or-later, like Blocwerk. See [LICENSE](LICENSE).
