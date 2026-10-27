@@ -1,0 +1,50 @@
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: version from the tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - run: pip install -r requirements-dev.txt build==1.3.0
+      - name: test
+        run: |
+          python -m pytest -q tests
+          dotnet test dotnet/Blocwerk.Contracts.slnx -c Release
+      - name: generated code matches the schemas
+        run: |
+          scripts/generate.sh
+          git add -N python/src dotnet/Blocwerk.Contracts.Compute/Generated
+          git diff --exit-code -- python/src dotnet/Blocwerk.Contracts.Compute/Generated
+      - name: NuGet package to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet pack dotnet/Blocwerk.Contracts.Compute -c Release -o dist -p:Version=${{ steps.version.outputs.version }}
+          dotnet nuget push "dist/*.nupkg" --source "https://nuget.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/index.json" --api-key "$GITHUB_TOKEN" --skip-duplicate
+      - name: wheel
+        run: python -m build --wheel --outdir dist python
+      - name: contracts tarball
+        run: tar -czf "dist/contracts-${{ steps.version.outputs.version }}.tar.gz" schemas openapi fixtures docs LICENSE
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes dist/*.whl dist/*.nupkg dist/*.tar.gz
