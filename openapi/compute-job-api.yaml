@@ -12,8 +12,8 @@ info:
     Jobs live in memory: results and files expire `RESULT_TTL_S` (default 3600 s) after the job finished, and
     everything is lost on restart. Treat a `404` on a job you knew as "expired or restarted" and submit again.
   license:
-    name: AGPL-3.0-only
-    identifier: AGPL-3.0-only
+    name: AGPL-3.0-or-later
+    identifier: AGPL-3.0-or-later
 security:
   - computeKey: []
 paths:

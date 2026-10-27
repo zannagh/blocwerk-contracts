@@ -4,7 +4,7 @@
     <PackageId>Blocwerk.Contracts.Compute</PackageId>
     <Version>0.0.0-dev</Version>
     <Description>Records of the Blocwerk runner API, compute-worker API and job documents, generated from the JSON Schemas of zannagh/blocwerk-contracts.</Description>
-    <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/zannagh/blocwerk-contracts</PackageProjectUrl>
     <RepositoryUrl>https://github.com/zannagh/blocwerk-contracts</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>

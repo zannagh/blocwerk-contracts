@@ -15,8 +15,8 @@ info:
     Not mapped at all when the server runs with `RUNNERS__MODE=off`. See docs/protocol.md for the job lifecycle,
     per-kind bundles and results, and docs/versioning.md for compatibility rules.
   license:
-    name: AGPL-3.0-only
-    identifier: AGPL-3.0-only
+    name: AGPL-3.0-or-later
+    identifier: AGPL-3.0-or-later
 servers:
   - url: https://blocwerk.app
 tags:
