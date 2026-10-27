@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling==1.29.0", "hatch-vcs==0.5.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "blocwerk-contracts"
+dynamic = ["version"]
+description = "Pydantic models of the Blocwerk runner and compute-worker protocol (generated from the JSON Schemas)."
+readme = "README.md"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2.7,<3"]
+
+[project.urls]
+Source = "https://github.com/zannagh/blocwerk-contracts"
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { root = "..", tag_regex = "^v(?P<version>\\d+\\.\\d+\\.\\d+.*)$" }
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/blocwerk_contracts"]

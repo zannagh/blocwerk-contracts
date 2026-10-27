@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../tools/GenerateCSharp/GenerateCSharp.csproj" />
+  <Project Path="Blocwerk.Contracts.Compute.Tests/Blocwerk.Contracts.Compute.Tests.csproj" />
+  <Project Path="Blocwerk.Contracts.Compute/Blocwerk.Contracts.Compute.csproj" />
+</Solution>
