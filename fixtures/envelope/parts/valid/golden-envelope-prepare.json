@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "service": "splat",
+  "kind": "splat-prepare",
+  "parts": [
+    {
+      "name": "photos",
+      "file": "IMG_0001.jpg"
+    },
+    {
+      "name": "photos",
+      "file": "IMG_0002.jpg"
+    },
+    {
+      "name": "photos",
+      "file": "IMG_0003.jpg"
+    },
+    {
+      "name": "photos",
+      "file": "vf_0001.jpg"
+    },
+    {
+      "name": "photos",
+      "file": "a00.jpg"
+    },
+    {
+      "name": "geometry",
+      "json": {
+        "cameras": [
+          {
+            "image": "IMG_0001",
+            "R": [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "t": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "segments": []
+      }
+    },
+    {
+      "name": "options",
+      "json": {
+        "quality": "high"
+      }
+    }
+  ]
+}

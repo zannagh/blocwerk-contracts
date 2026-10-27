@@ -1,0 +1,15 @@
+{
+  "status": "degraded",
+  "service": "splat-worker",
+  "protocol": "blocwerk-compute/1",
+  "version": "0.1.0",
+  "kinds": [
+    "splat",
+    "splat-prepare",
+    "splat-finish"
+  ],
+  "prepareOutputs": [
+    "sparse.zip",
+    "anchors"
+  ]
+}

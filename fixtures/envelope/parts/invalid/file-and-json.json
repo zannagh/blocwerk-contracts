@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "service": "splat",
+  "kind": "splat-finish",
+  "parts": [
+    {
+      "name": "splat",
+      "file": "splat.ply",
+      "json": {}
+    }
+  ]
+}

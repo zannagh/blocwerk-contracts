@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/runner/hello.schema.json",
+  "title": "RunnerHello",
+  "description": "POST /api/runners/hello: what a runner reports about itself. Every field is optional; the server clips or drops values it does not accept and ignores unknown fields. A runner says hello at start, after a re-connect and every 30 s while paused.",
+  "type": "object",
+  "properties": {
+    "runnerVersion": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The runner's own version (stored clipped to 64 characters)."
+    },
+    "gpuName": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "GPU name (clipped to 200 characters)."
+    },
+    "vramMb": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "GPU memory, MB. Kept only when 0 < vramMb < 10000000."
+    },
+    "maxQuality": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/quality"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The highest quality this runner trains. The server lowers it to what the reported trainer and VRAM support (ultra needs gsplat)."
+    },
+    "memoryBudgetMb": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Host memory the runner may use, MB. Kept only when 0 < value < 10000000. From runner protocol 1.1 the server offers 'splat-prepare' / 'splat-finish' jobs only when it covers the job's requiredMemoryMb."
+    },
+    "platform": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Free text, e.g. 'Darwin arm64'."
+    },
+    "brushVersion": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Brush version (Brush runners only; shown when trainer is absent)."
+    },
+    "trainer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "'gsplat' or 'brush' (case-insensitive); anything else is stored as unknown."
+    },
+    "trainerVersion": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Sent by the Python runner; the server does not read it."
+    },
+    "cuda": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "The trainer runs on CUDA."
+    },
+    "paused": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "The owner paused this runner: it takes no new jobs. Null from runners that do not report it."
+    },
+    "capabilities": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "description": "Job kinds this runner serves (see $defs/capability). The server keeps known names only (trimmed, lower-cased, de-duplicated). Absent, null or no known name: the runner counts as 'splat' only."
+    },
+    "texturesMemoryMb": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Blend memory budget for textures jobs, MB. Kept only with the 'textures' capability and 0 < value < 10000000. A textures job is offered only when it covers the job's requiredMemoryMb."
+    }
+  },
+  "$defs": {
+    "quality": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "high",
+        "max",
+        "ultra"
+      ],
+      "description": "Splat quality profile, lowest to highest."
+    },
+    "capability": {
+      "type": "string",
+      "enum": [
+        "splat",
+        "textures",
+        "detect-holds",
+        "register-panels",
+        "splat-prepare",
+        "splat-finish"
+      ],
+      "description": "A job kind a runner may advertise. 'splat-prepare' / 'splat-finish': added in runner protocol 1.1 (blocwerk staging-o7, prs #239/#240; not on main yet)."
+    }
+  },
+  "additionalProperties": true
+}

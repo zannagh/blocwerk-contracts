@@ -1,0 +1,9 @@
+{
+  "runnerVersion": "0.0.9",
+  "gpuName": "Apple M4",
+  "vramMb": 16384,
+  "maxQuality": "high",
+  "memoryBudgetMb": 9600,
+  "platform": "Darwin arm64",
+  "brushVersion": "0.3.0"
+}

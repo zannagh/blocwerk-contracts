@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/textures/textures-manifest.schema.json",
+  "title": "TexturesManifest",
+  "description": "textures.json: the manifest of a textures result, both in a runner's result zip and as result of the compute API's 'textures' job. The app reads the facets (CaptureComputeDocuments.ParseTextureResult): rows with a bad facet id, a missing file, a non-finite bound or a size outside 1..16384 are skipped, at most 64 are read, the first row per facet wins.",
+  "type": "object",
+  "required": [
+    "facets"
+  ],
+  "properties": {
+    "pixelConvention": {
+      "type": "string"
+    },
+    "facets": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/textureFacet"
+      }
+    }
+  },
+  "$defs": {
+    "textureFacet": {
+      "type": "object",
+      "required": [
+        "facet",
+        "file",
+        "bounds",
+        "widthPx",
+        "heightPx"
+      ],
+      "properties": {
+        "facet": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,16}$"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "maskFile": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "sourceFile": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "mmPerPx": {
+          "type": "number"
+        },
+        "bounds": {
+          "$ref": "#/$defs/textureBounds"
+        },
+        "widthPx": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16384
+        },
+        "heightPx": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16384
+        },
+        "photosUsed": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Camera image -> share of the texture it painted."
+        },
+        "coverage": {
+          "type": "number"
+        },
+        "markerCheck": {
+          "type": "object"
+        },
+        "exposure": {
+          "type": "object"
+        },
+        "shading": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    },
+    "textureBounds": {
+      "type": "object",
+      "required": [
+        "aMin",
+        "aMax",
+        "bMin",
+        "bMax"
+      ],
+      "properties": {
+        "aMin": {
+          "type": "number"
+        },
+        "aMax": {
+          "type": "number"
+        },
+        "bMin": {
+          "type": "number"
+        },
+        "bMax": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,26 @@
+{
+  "status": "ok",
+  "service": "wall-geometry",
+  "protocol": "blocwerk-compute/1",
+  "version": "0.1.0",
+  "kinds": [
+    "solve",
+    "solve-sfm",
+    "textures"
+  ],
+  "gitSha": "unknown",
+  "auth": false,
+  "jobs": {
+    "queued": 0,
+    "running": 0
+  },
+  "limits": {
+    "maxPhotos": 200,
+    "maxPhotoMb": 40,
+    "maxRequestMb": 4096,
+    "maxImageMegapixels": 100,
+    "texturesMaxMegapixels": 200,
+    "sfmMaxSparseMb": 256,
+    "sfmTimeoutS": 900
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "options": {
+    "mmPerPx": 1.0,
+    "blendViews": 6,
+    "maxSidePx": 8192
+  }
+}

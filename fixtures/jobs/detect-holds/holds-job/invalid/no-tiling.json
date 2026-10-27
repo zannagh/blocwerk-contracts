@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "wholeImageConfidence": 0.25,
+  "windowIoU": 0.45
+}

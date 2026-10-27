@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/runner/hello-response.schema.json",
+  "title": "RunnerHelloResponse",
+  "description": "200 answer to POST /api/runners/hello.",
+  "type": "object",
+  "required": [
+    "runnerId",
+    "name",
+    "pollSeconds"
+  ],
+  "properties": {
+    "runnerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "name": {
+      "type": "string",
+      "description": "The runner's name as its owner set it."
+    },
+    "pollSeconds": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How long the server holds an empty claim (the long-poll wait)."
+    },
+    "pauseAware": {
+      "type": "boolean",
+      "description": "The server understands hello's 'paused' and fail's 'pause'. Absent on servers from before the pause switch: a runner must then stop sending paused hellos (it shows offline there)."
+    }
+  },
+  "additionalProperties": true
+}

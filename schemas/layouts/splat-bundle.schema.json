@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/layouts/splat-bundle.schema.json",
+  "title": "SplatBundleLayout",
+  "description": "GET .../bundle of a 'splat' job: the splat-prepare bundle.zip, rebuilt entry by entry by the server (RunnerBundle): images metadata-stripped and stored, at most 20000 entries, 8 GiB uncompressed, 256 MiB per entry. Directory entries (ending in /) are ignored. Paths with .., a leading /, \\ or :, or over 300 characters are refused. The instance is the list of the zip's entry names, in order.",
+  "type": "array",
+  "items": {
+    "type": "string",
+    "anyOf": [
+      {
+        "type": "string",
+        "const": "train.json"
+      },
+      {
+        "type": "string",
+        "const": "zones.json"
+      },
+      {
+        "pattern": "^dataset/images/[^\\\\:]+\\.(jpg|jpeg|png)$"
+      },
+      {
+        "pattern": "^dataset/sparse/[^\\\\:]+\\.(bin|txt)$"
+      },
+      {
+        "pattern": "^[^\\\\:]*/$"
+      }
+    ]
+  },
+  "uniqueItems": true,
+  "maxItems": 20000,
+  "allOf": [
+    {
+      "contains": {
+        "type": "string",
+        "const": "train.json"
+      }
+    },
+    {
+      "contains": {
+        "type": "string",
+        "pattern": "^dataset/images/"
+      }
+    },
+    {
+      "not": {
+        "contains": {
+          "type": "string",
+          "pattern": "(^/|\\.\\.)"
+        }
+      }
+    }
+  ]
+}

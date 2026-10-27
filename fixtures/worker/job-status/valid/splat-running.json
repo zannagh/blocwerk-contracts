@@ -1,0 +1,13 @@
+{
+  "jobId": "0d9c2b7f5a6e4f3d8c1b2a0e9f8d7c6b",
+  "kind": "splat",
+  "status": "running",
+  "progress": 0.412,
+  "stage": "train",
+  "stageDetail": "step 1200/5000",
+  "message": null,
+  "error": null,
+  "createdAt": "2026-09-23T10:00:00+00:00",
+  "updatedAt": "2026-09-23T10:21:13+00:00",
+  "result": null
+}

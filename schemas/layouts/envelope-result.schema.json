@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/layouts/envelope-result.schema.json",
+  "title": "EnvelopeResultLayout",
+  "description": "Added in runner protocol 1.1 (blocwerk staging-o7, PRs #239/#240; not on main yet): PUT .../result of a 'splat-prepare' / 'splat-finish' job: status.json plus exactly the files its result.files lists, every file but status.json stored uncompressed, at most 64 entries (RunnerComputeResult). Names are unique ignoring case. The instance is the list of the zip's entry names, in order.",
+  "type": "array",
+  "items": {
+    "type": "string",
+    "anyOf": [
+      {
+        "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.\\-]{0,127}\\.(zip|json|splat|spz|ply)$"
+      }
+    ]
+  },
+  "uniqueItems": true,
+  "maxItems": 64,
+  "allOf": [
+    {
+      "contains": {
+        "type": "string",
+        "const": "status.json"
+      }
+    }
+  ]
+}

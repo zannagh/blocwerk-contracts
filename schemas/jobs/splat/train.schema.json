@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/splat/train.schema.json",
+  "title": "SplatTrainOptions",
+  "description": "train.json of a 'splat' bundle: the quality profile to train (splat-worker bundle.train_doc). The server (RunnerTrainOptions) refuses unknown keys, strings over 64 characters and arrays of non-numbers; the runner (bundle.profile_from_doc) needs version 1, every key, and the ranges below. This schema is what both accept.",
+  "type": "object",
+  "required": [
+    "version",
+    "quality",
+    "edge",
+    "frameEdge",
+    "minEdge",
+    "steps",
+    "maxSplats",
+    "minSplats",
+    "growthStop",
+    "refineEvery",
+    "growthSelectFraction",
+    "shDegree",
+    "checkpoints"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "quality": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "high",
+        "max",
+        "ultra"
+      ]
+    },
+    "edge": {
+      "type": "integer",
+      "minimum": 256,
+      "maximum": 8192,
+      "description": "Photos' long edge, px."
+    },
+    "frameEdge": {
+      "type": "integer",
+      "description": "Video frames' long edge, px."
+    },
+    "minEdge": {
+      "type": "integer",
+      "description": "The profile's floor when fitting memory."
+    },
+    "steps": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 100000
+    },
+    "maxSplats": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 20000000
+    },
+    "minSplats": {
+      "type": "integer"
+    },
+    "growthStop": {
+      "type": "number",
+      "description": "Fraction of the steps after which growth stops (0: the trainer's default)."
+    },
+    "refineEvery": {
+      "type": "integer",
+      "description": "0: the trainer's default."
+    },
+    "growthSelectFraction": {
+      "type": "number",
+      "description": "0: the trainer's default."
+    },
+    "shDegree": {
+      "type": "integer"
+    },
+    "checkpoints": {
+      "type": "integer",
+      "description": "Exports during training (the last one is the result)."
+    }
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/envelope/parts.schema.json",
+  "title": "EnvelopeParts",
+  "description": "Added in runner protocol 1.1 (blocwerk staging-o7, PRs #239/#240; not on main yet): parts.json, the first entry of a runner envelope: the bundle of a 'splat-prepare' / 'splat-finish' job. It is the multipart request the HTTP worker would have received; each part is a file (a stored zip entry of that name) or an inline JSON field. A runner refuses a part name its kind does not take.",
+  "type": "object",
+  "required": [
+    "version",
+    "service",
+    "kind",
+    "parts"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "service": {
+      "type": "string",
+      "const": "splat"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "splat-prepare",
+        "splat-finish"
+      ]
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/part"
+      },
+      "description": "In the order of the original request; a part name may repeat (photos), file names are unique ignoring case."
+    }
+  },
+  "$defs": {
+    "part": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "not": {
+            "anyOf": [
+              {
+                "pattern": "[/\\\\:\\u0000-\\u001f]"
+              },
+              {
+                "enum": [
+                  ".",
+                  ".."
+                ]
+              },
+              {
+                "pattern": "^[Pp][Aa][Rr][Tt][Ss]\\.[Jj][Ss][Oo][Nn]$"
+              }
+            ]
+          },
+          "description": "A zip entry of this name, which is also the part's file name. A plain name: no / \\ : or control characters, not . or .., not parts.json (any case), unique ignoring case. Otherwise unrestricted (spaces, non-ASCII): treat as untrusted."
+        },
+        "json": {
+          "description": "The JSON field's value, inline (any JSON value)."
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "file"
+          ],
+          "not": {
+            "required": [
+              "json"
+            ]
+          }
+        },
+        {
+          "required": [
+            "json"
+          ],
+          "not": {
+            "required": [
+              "file"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "splat-prepare"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {
+              "properties": {
+                "name": {
+                  "enum": [
+                    "photos",
+                    "geometry",
+                    "options"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "splat-finish"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {
+              "properties": {
+                "name": {
+                  "enum": [
+                    "prepared",
+                    "splat",
+                    "trainStats"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

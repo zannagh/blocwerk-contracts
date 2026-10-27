@@ -1,0 +1,38 @@
+{
+  "jobId": "11111111-2222-3333-4444-555555555555",
+  "kind": "splat-prepare",
+  "status": "succeeded",
+  "progress": 1.0,
+  "stage": "done",
+  "stageDetail": null,
+  "message": null,
+  "error": null,
+  "createdAt": "2026-01-01T00:00:00+00:00",
+  "updatedAt": "2026-01-01T00:00:00+00:00",
+  "result": {
+    "bundle": {
+      "images": 3,
+      "bytes": 11
+    },
+    "quality": "high",
+    "stats": {
+      "photos": 3,
+      "registeredImages": 3,
+      "sparsePoints": 1200
+    },
+    "files": [
+      {
+        "name": "bundle.zip",
+        "url": "/v1/jobs/11111111-2222-3333-4444-555555555555/files/bundle.zip"
+      },
+      {
+        "name": "prepared.json",
+        "url": "/v1/jobs/11111111-2222-3333-4444-555555555555/files/prepared.json"
+      },
+      {
+        "name": "sparse.zip",
+        "url": "/v1/jobs/11111111-2222-3333-4444-555555555555/files/sparse.zip"
+      }
+    ]
+  }
+}

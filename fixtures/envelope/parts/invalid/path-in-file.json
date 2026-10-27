@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "service": "splat",
+  "kind": "splat-prepare",
+  "parts": [
+    {
+      "name": "photos",
+      "file": "../p01.jpg"
+    }
+  ]
+}

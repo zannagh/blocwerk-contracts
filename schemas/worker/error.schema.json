@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/worker/error.schema.json",
+  "title": "ComputeError",
+  "description": "Body of every 4xx/5xx of a compute worker (FastAPI's HTTPException shape).",
+  "type": "object",
+  "required": [
+    "detail"
+  ],
+  "properties": {
+    "detail": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

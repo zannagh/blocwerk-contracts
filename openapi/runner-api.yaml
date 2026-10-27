@@ -1,0 +1,399 @@
+openapi: 3.1.0
+info:
+  title: Blocwerk runner API
+  version: "1.1"
+  summary: The pull API between the Blocwerk app and its 3D/compute runners.
+  description: |
+    A runner connects OUT to the app with its `bwr_` key, says hello, long-polls for work, downloads its claimed
+    job's bundle, reports progress (the lease heartbeat), uploads previews while it trains and then its result.
+    Nothing here authenticates a person: the key names a runner. Every job-scoped call re-checks that the job is
+    the calling runner's own claim: `404` otherwise, `410` once it was taken away (its `reason` says whether the
+    job is over for good or went back to the queue).
+
+    Describes blocwerk `src/Blocwerk.Web/Endpoints/RunnerApiEndpoints*.cs`: runner protocol 1.0 as on `main`, plus the
+    additive 1.1 kinds `splat-prepare` / `splat-finish` (merged to `staging-o7`, PRs #239/#240).
+    Not mapped at all when the server runs with `RUNNERS__MODE=off`. See docs/protocol.md for the job lifecycle,
+    per-kind bundles and results, and docs/versioning.md for compatibility rules.
+  license:
+    name: AGPL-3.0-only
+    identifier: AGPL-3.0-only
+servers:
+  - url: https://blocwerk.app
+tags:
+  - name: session
+  - name: job
+security:
+  - runnerKey: []
+paths:
+  /api/runners/hello:
+    post:
+      tags: [session]
+      operationId: hello
+      summary: Report the runner's hardware, capabilities and pause state.
+      parameters:
+        - $ref: "#/components/parameters/ClaimToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/runner/hello.schema.json"
+      responses:
+        "200":
+          description: Accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/runner/hello-response.schema.json"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/runners/claim:
+    post:
+      tags: [session]
+      operationId: claim
+      summary: Long-poll for a job (about 25 s when the queue is empty).
+      description: |
+        Returns the oldest queued job the runner may take (its walls first, shared help second), filtered by
+        capability, quality, bundle size and memory. A runner that already holds a job and has been silent long
+        enough to have restarted gets that job back (`reattached: true`). A claim also clears the runner's paused
+        flag.
+      parameters:
+        - $ref: "#/components/parameters/ClaimToken"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/runner/claim-request.schema.json"
+      responses:
+        "200":
+          description: A job.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/runner/claim.schema.json"
+        "204":
+          description: Nothing to do within the wait.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/runners/jobs/{jobId}/bundle:
+    get:
+      tags: [job]
+      operationId: downloadBundle
+      summary: Download the claimed job's input (a zip; Range requests supported).
+      description: |
+        The zip layout depends on the claim's `kind` (schemas/layouts). A bundle missing on the server fails the
+        job at once (`410` with reason `over`). Check `bundleBytes` and `bundleSha256` from the claim.
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+        - $ref: "#/components/parameters/ClaimToken"
+        - name: Range
+          in: header
+          required: false
+          schema:
+            type: string
+          example: bytes=1048576-
+      responses:
+        "200":
+          description: The whole bundle.
+          content:
+            application/zip:
+              schema:
+                type: string
+                contentMediaType: application/zip
+        "206":
+          description: The requested range.
+          content:
+            application/zip:
+              schema:
+                type: string
+                contentMediaType: application/zip
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotYours"
+        "410":
+          $ref: "#/components/responses/Gone"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/runners/jobs/{jobId}/progress:
+    post:
+      tags: [job]
+      operationId: progress
+      summary: Report progress; renews the lease (the heartbeat).
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+        - $ref: "#/components/parameters/ClaimToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/runner/progress.schema.json"
+      responses:
+        "200":
+          description: Lease renewed.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/runner/progress-response.schema.json"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotYours"
+        "410":
+          $ref: "#/components/responses/Gone"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/runners/jobs/{jobId}/fail:
+    post:
+      tags: [job]
+      operationId: fail
+      summary: Hand the job back (failure, shutdown, pause, or the server out of reach).
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+        - $ref: "#/components/parameters/ClaimToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/runner/failure.schema.json"
+      responses:
+        "200":
+          $ref: "#/components/responses/Ok"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotYours"
+        "410":
+          $ref: "#/components/responses/Gone"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/runners/jobs/{jobId}/result:
+    put:
+      tags: [job]
+      operationId: uploadResult
+      summary: Upload the job's result (one upload per job at a time).
+      description: |
+        The body depends on the claim's `kind`:
+
+        | kind | body | cap (decoded) |
+        |---|---|---|
+        | `splat` | the trained scene, a `.ply` or `.spz` file | `RUNNERS__MAXRESULTMB` (2 GiB) |
+        | `textures` | zip, schemas/layouts/textures-result + textures.json | same |
+        | `detect-holds` | JSON, schemas/jobs/detect-holds/holds-result | 64 MiB |
+        | `register-panels` | JSON, schemas/jobs/register-panels/panels-result | 4 MiB |
+        | `splat-prepare` (1.1) | runner envelope result zip, schemas/layouts/envelope-result | `MaxBundleBytes` + 576 MiB |
+        | `splat-finish` (1.1) | runner envelope result zip, schemas/layouts/envelope-result | `RUNNERS__MAXRESULTMB` (2 GiB) |
+
+        `Content-Encoding: gzip` is decoded while streaming (the cap counts decoded bytes; a body that inflates past a
+        sane ratio is stopped). Slower than 16 KiB/s after 30 s, or longer than the upload deadline, ends the upload.
+        A first complete, valid upload completes the job; the server then finishes and installs it.
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+        - $ref: "#/components/parameters/ClaimToken"
+        - name: X-Blocwerk-Stats
+          in: header
+          required: false
+          description: Training stats, JSON (schemas/runner/upload-stats). Dropped silently when not acceptable.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/runner/upload-stats.schema.json"
+        - $ref: "#/components/parameters/ContentEncoding"
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              contentMediaType: application/octet-stream
+      responses:
+        "200":
+          $ref: "#/components/responses/Ok"
+        "400":
+          $ref: "#/components/responses/Interrupted"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotYours"
+        "408":
+          $ref: "#/components/responses/TookTooLong"
+        "409":
+          $ref: "#/components/responses/UploadInProgress"
+        "410":
+          $ref: "#/components/responses/Gone"
+        "413":
+          $ref: "#/components/responses/TooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedEncoding"
+        "422":
+          $ref: "#/components/responses/Invalid"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "507":
+          $ref: "#/components/responses/InsufficientStorage"
+  /api/runners/jobs/{jobId}/preview:
+    put:
+      tags: [job]
+      operationId: uploadPreview
+      summary: Upload an intermediate splat while training ('splat' claims with previews only).
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+        - $ref: "#/components/parameters/ClaimToken"
+        - name: step
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: total
+          in: query
+          required: true
+          schema:
+            type: integer
+        - $ref: "#/components/parameters/ContentEncoding"
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              contentMediaType: application/octet-stream
+      responses:
+        "200":
+          $ref: "#/components/responses/Ok"
+        "400":
+          $ref: "#/components/responses/Interrupted"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotYours"
+        "408":
+          $ref: "#/components/responses/TookTooLong"
+        "409":
+          $ref: "#/components/responses/UploadInProgress"
+        "410":
+          $ref: "#/components/responses/Gone"
+        "413":
+          $ref: "#/components/responses/TooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedEncoding"
+        "422":
+          description: Not a splat, or a preview the server does not take (previews off or used up, too early, too soon after the last one, or a newer preview or the result is here). Carry on training.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "../schemas/runner/problem.schema.json"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "507":
+          $ref: "#/components/responses/InsufficientStorage"
+components:
+  securitySchemes:
+    runnerKey:
+      type: http
+      scheme: bearer
+      description: The runner's `bwr_` key, created by the runner's owner in the app. Shown once.
+  parameters:
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ClaimToken:
+      name: X-Blocwerk-Claim
+      in: header
+      required: false
+      description: |
+        Random per runner process (1..64 characters). A claim records it; later job calls with a different token are
+        refused, so a second process with the same key cannot train the same job. A runner that sends none is not
+        checked.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
+    ContentEncoding:
+      name: Content-Encoding
+      in: header
+      required: false
+      schema:
+        type: string
+        enum: [gzip, identity]
+  responses:
+    Ok:
+      description: Done.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/runner/ok-response.schema.json"
+    Unauthorized:
+      description: Missing, unknown or revoked key (no body). The Python runner exits with code 3.
+    NotYours:
+      description: Not this runner's job, or unknown (no body). Drop it.
+    Gone:
+      description: It was this runner's job; `reason` says whether it is over for good or went back to the queue.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../schemas/runner/problem.schema.json"
+    TooManyRequests:
+      description: |
+        Throttled: per address (burst 120, 40 per 10 s) before authentication, per runner (burst 60, 20 per 10 s) after
+        it; or (uploads) the server takes no more uploads right now. Wait `Retry-After` seconds.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../schemas/runner/problem.schema.json"
+    Interrupted:
+      description: The upload was interrupted (client hung up, or below the minimum data rate).
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../schemas/runner/problem.schema.json"
+    TookTooLong:
+      description: The upload took longer than the upload deadline. Retry.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../schemas/runner/problem.schema.json"
+    UploadInProgress:
+      description: Another upload for this job is still streaming. Retry later.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../schemas/runner/problem.schema.json"
+    TooLarge:
+      description: Over the size cap for this kind.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../schemas/runner/problem.schema.json"
+    UnsupportedEncoding:
+      description: A Content-Encoding other than gzip or identity.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../schemas/runner/problem.schema.json"
+    Invalid:
+      description: The upload is not a valid result for this kind. The claim stays.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../schemas/runner/problem.schema.json"
+    InsufficientStorage:
+      description: The server is short of disk space. Retry later.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "../schemas/runner/problem.schema.json"

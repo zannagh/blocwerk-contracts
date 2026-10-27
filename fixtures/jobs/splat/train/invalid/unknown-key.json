@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "quality": "high",
+  "edge": 2400,
+  "frameEdge": 1280,
+  "minEdge": 1920,
+  "steps": 15000,
+  "maxSplats": 2000000,
+  "minSplats": 800000,
+  "growthStop": 0.6,
+  "refineEvery": 0,
+  "growthSelectFraction": 0.15,
+  "shDegree": 0,
+  "checkpoints": 3,
+  "learningRate": 0.001
+}

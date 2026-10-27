@@ -1,0 +1,6 @@
+{
+  "type": "https://tools.ietf.org/html/rfc6585#section-4",
+  "title": "Too Many Requests",
+  "status": 429,
+  "detail": "This runner calls too often."
+}

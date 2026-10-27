@@ -1,0 +1,18 @@
+{
+  "runnerVersion": "0.1.0",
+  "gpuName": "Apple M5 Pro",
+  "vramMb": 49152,
+  "maxQuality": "max",
+  "memoryBudgetMb": 13357,
+  "platform": "Darwin arm64",
+  "trainer": "brush",
+  "cuda": false,
+  "trainerVersion": "0.3.0",
+  "capabilities": [
+    "splat",
+    "textures",
+    "detect-holds"
+  ],
+  "texturesMemoryMb": 24576,
+  "brushVersion": "0.3.0"
+}

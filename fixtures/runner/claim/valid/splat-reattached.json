@@ -1,0 +1,13 @@
+{
+  "jobId": "6f1d2c1e-6b0a-4a51-9a52-3f7c1d1b2a10",
+  "quality": "ultra",
+  "leaseSeconds": 300,
+  "bundleBytes": 6,
+  "bundleSha256": "1e6ed65d77d6364eeaed5a745ba5c4985ae2b700dd85d7cf7f027bdf294a33fc",
+  "previews": false,
+  "reattached": true,
+  "wallId": "0c3b8f7e-2d4a-4e8b-b1f2-7a9e5c3d1f20",
+  "captureId": "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c30",
+  "kind": "splat",
+  "requiredMemoryMb": null
+}

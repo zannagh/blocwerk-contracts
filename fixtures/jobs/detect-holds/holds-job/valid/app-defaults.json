@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "tiling": {
+    "enabled": true,
+    "tileSize": 1280,
+    "overlap": 256,
+    "confidence": 0.35,
+    "sampling": "nearest"
+  },
+  "wholeImageConfidence": 0.25,
+  "windowIoU": 0.45
+}

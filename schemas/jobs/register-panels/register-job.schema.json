@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/register-panels/register-job.schema.json",
+  "title": "RegisterPanelsJob",
+  "description": "register-job.json of a 'register-panels' bundle (RunnerPanelsBundle): the capture's solved cameras (wall world, mm) that have a photo in the bundle, and the panel photos to register. The bundle also holds photos/<camera>.jpg|png and panels/<panel name>.jpg|png.",
+  "type": "object",
+  "required": [
+    "version",
+    "cameras",
+    "panels"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "cameras": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/solvedCamera"
+      }
+    },
+    "panels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9A-Fa-f]{32}r[0-9]+$",
+        "description": "<panel id, 32 hex digits>r<photo revision>; a crop moves the revision."
+      }
+    }
+  },
+  "$defs": {
+    "solvedCamera": {
+      "type": "object",
+      "required": [
+        "name",
+        "width",
+        "height",
+        "K",
+        "dist",
+        "R",
+        "t"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Camera image name; the photo is photos/<name>.jpg|png."
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "K": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 9,
+          "maxItems": 9,
+          "description": "Row-major 3x3 intrinsics."
+        },
+        "dist": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "OpenCV distortion (k1, k2, p1, p2[, k3])."
+        },
+        "R": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 9,
+          "maxItems": 9,
+          "description": "Row-major world -> camera rotation."
+        },
+        "t": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "World -> camera translation, mm."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

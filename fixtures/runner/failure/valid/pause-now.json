@@ -1,0 +1,7 @@
+{
+  "reason": "paused by its owner",
+  "retryable": true,
+  "shutdown": true,
+  "pause": true,
+  "checkpointStep": 14000
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/layouts/holds-bundle.schema.json",
+  "title": "HoldsBundleLayout",
+  "description": "GET .../bundle of a 'detect-holds' job (RunnerHoldsBundle). model.onnx is the app's detector. The instance is the list of the zip's entry names, in order.",
+  "type": "array",
+  "items": {
+    "type": "string",
+    "anyOf": [
+      {
+        "type": "string",
+        "const": "holds-job.json"
+      },
+      {
+        "type": "string",
+        "const": "model.onnx"
+      },
+      {
+        "pattern": "^photos/[^/\\\\]+\\.(jpg|jpeg|png)$"
+      }
+    ]
+  },
+  "uniqueItems": true,
+  "allOf": [
+    {
+      "contains": {
+        "type": "string",
+        "const": "holds-job.json"
+      }
+    },
+    {
+      "contains": {
+        "type": "string",
+        "const": "model.onnx"
+      }
+    },
+    {
+      "contains": {
+        "type": "string",
+        "pattern": "^photos/"
+      }
+    }
+  ]
+}

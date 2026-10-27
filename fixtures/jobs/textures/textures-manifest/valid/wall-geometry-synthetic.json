@@ -1,0 +1,61 @@
+{
+  "pixelConvention": "column i, row j -> a = aMin + (i + 0.5) * mmPerPx, b = bMax - (j + 0.5) * mmPerPx (facet frame of the geometry); maskFile: same grid, 8-bit gray, 0 = no photo there, 255 = photo, feathered edge; sourceFile: which photo painted each label cell (wallgeometry/sourcemap.py)",
+  "facets": [
+    {
+      "facet": "0",
+      "mmPerPx": 2.0,
+      "bounds": {
+        "aMin": 200.0,
+        "aMax": 1000.0,
+        "bMin": 100.0,
+        "bMax": 900.0
+      },
+      "widthPx": 400,
+      "heightPx": 400,
+      "photosUsed": {
+        "SYN_1": 1.0
+      },
+      "coverage": 1.0,
+      "markerCheck": {
+        "detected": 1,
+        "expected": 1,
+        "markers": [
+          {
+            "id": 0,
+            "sideMm": 124.61,
+            "sideErrMm": -0.39,
+            "positionErrMm": 0.06,
+            "cornersRefined": 4
+          }
+        ],
+        "sideRmsErrMm": 0.39,
+        "maxPositionErrMm": 0.06
+      },
+      "exposure": {
+        "reference": null,
+        "pairs": 0,
+        "gainMin": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "gainMax": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "shading": {
+        "group": [
+          "0"
+        ],
+        "overhangDeg": -0.0,
+        "gainMin": 1.0,
+        "gainMax": 1.0
+      },
+      "file": "facet_0.jpg",
+      "maskFile": "facet_0_mask.png",
+      "sourceFile": "facet_0_source.json"
+    }
+  ]
+}

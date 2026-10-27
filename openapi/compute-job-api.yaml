@@ -1,0 +1,274 @@
+openapi: 3.1.0
+info:
+  title: Blocwerk compute job API
+  version: "1.0"
+  summary: The HTTP job API of the Blocwerk compute workers (protocol `blocwerk-compute/1`).
+  description: |
+    One protocol, several workers: `wall-geometry` (kinds `solve`, `solve-sfm`, `textures`) and `splat-worker`
+    (kinds `splat`, `splat-prepare`, `splat-finish`). The app knows a worker only as a base URL plus an optional
+    API key. Implemented once in blocwerk `docker/compute-jobs-py` (`computejobs/service.py`); each worker adds its
+    kinds' request parsing. Workers have no `/docs` or `/openapi.json`: this document and docs/protocol.md are the spec.
+
+    Jobs live in memory: results and files expire `RESULT_TTL_S` (default 3600 s) after the job finished, and
+    everything is lost on restart. Treat a `404` on a job you knew as "expired or restarted" and submit again.
+  license:
+    name: AGPL-3.0-only
+    identifier: AGPL-3.0-only
+security:
+  - computeKey: []
+paths:
+  /health:
+    get:
+      operationId: health
+      summary: Liveness and the kinds served (never authenticated).
+      security: []
+      responses:
+        "200":
+          description: The worker is up.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/worker/health.schema.json"
+  /v1/info:
+    get:
+      operationId: info
+      summary: /health plus limits, tool versions and queue counts.
+      responses:
+        "200":
+          description: Details.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/worker/info.schema.json"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/jobs/{kind}:
+    post:
+      operationId: createJob
+      summary: Submit a job of a kind.
+      description: |
+        The body format is per kind (docs/protocol.md "Kinds"). Every kind accepts an optional `callbackUrl` (a
+        top-level JSON field for JSON bodies, a form field for multipart bodies). JSON `NaN` / `Infinity` are refused.
+        Photos are parsed while streaming and cleaned in memory; a photo whose header claims more than
+        `MAX_IMAGE_MEGAPIXELS` (100) is refused before decoding.
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [solve, solve-sfm, textures, splat, splat-prepare, splat-finish]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: "`solve`: the solve request document (blocwerk docker/wall-geometry/README.md), plus optional callbackUrl."
+              type: object
+              properties:
+                callbackUrl:
+                  type: string
+                  format: uri
+          multipart/form-data:
+            schema:
+              description: "`textures`, `solve-sfm`, `splat`, `splat-prepare`, `splat-finish`: parts per kind (docs/protocol.md)."
+              type: object
+              properties:
+                photos:
+                  type: array
+                  items:
+                    type: string
+                    contentMediaType: application/octet-stream
+                geometry:
+                  description: A solved wall-geometry document (textures; optional for splat and splat-prepare).
+                  type: object
+                options:
+                  description: "Per kind: schemas/worker/splat-options (splat, splat-prepare) or the textures options (textures)."
+                  oneOf:
+                    - $ref: "../schemas/worker/splat-options.schema.json"
+                    - $ref: "../schemas/jobs/textures/textures-job.schema.json#/$defs/texturesOptions"
+                request:
+                  description: solve-sfm request JSON.
+                  type: object
+                sparse:
+                  description: solve-sfm input, splat-prepare's sparse.zip.
+                  type: string
+                  contentMediaType: application/zip
+                prepared:
+                  description: splat-finish input, splat-prepare's prepared.json.
+                  type: object
+                splat:
+                  description: splat-finish input, the trained scene (splat.ply or splat.spz).
+                  type: string
+                  contentMediaType: application/octet-stream
+                trainStats:
+                  description: splat-finish input, optional training stats.
+                  type: object
+                callbackUrl:
+                  type: string
+                  format: uri
+      responses:
+        "202":
+          description: Queued.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/worker/job-accepted.schema.json"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Unknown kind.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/worker/error.schema.json"
+        "413":
+          description: Body, photo, photo count or pixel count too large.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/worker/error.schema.json"
+        "422":
+          description: Well-formed but invalid input (unknown or out-of-range options included); `detail` says what.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/worker/error.schema.json"
+        "429":
+          description: Queue full; retry later.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/worker/error.schema.json"
+        "501":
+          description: The kind is served by a different worker.
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/worker/error.schema.json"
+        "503":
+          description: splat-worker only, its tools (Brush, COLMAP) are missing (`/health` says degraded).
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/worker/error.schema.json"
+  /v1/jobs/{jobId}:
+    parameters:
+      - $ref: "#/components/parameters/JobId"
+    get:
+      operationId: getJob
+      summary: The job's status (poll this; it is the primary path).
+      responses:
+        "200":
+          $ref: "#/components/responses/Status"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NoSuchJob"
+    delete:
+      operationId: cancelJob
+      summary: Cancel. A queued job is cancelled at once, a running one within about a second; a finished one is unchanged.
+      responses:
+        "200":
+          $ref: "#/components/responses/Status"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NoSuchJob"
+  /v1/jobs/{jobId}/files/{name}:
+    get:
+      operationId: getJobFile
+      summary: A file of a succeeded job, as listed in result.files.
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Za-z0-9_.-]{1,128}$"
+      responses:
+        "200":
+          description: The file (image/jpeg, image/png, application/json, application/octet-stream for .splat/.spz/.ply).
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                contentMediaType: application/octet-stream
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NoSuchJob"
+webhooks:
+  jobStatus:
+    post:
+      operationId: jobStatusCallback
+      summary: Progress callback to a job's callbackUrl, on every status change (best effort).
+      description: |
+        Sent only when the worker has `COMPUTE_CALLBACK_SECRET`. Verify `X-Blocwerk-Signature` over the raw body
+        (constant time) before trusting anything. Retries 1 s, 3 s, 9 s (5 s timeout each); order across retries is
+        not guaranteed: use `updatedAt` / `status`, not arrival order. Redirects are not followed.
+      parameters:
+        - name: X-Blocwerk-Signature
+          in: header
+          required: true
+          description: "`sha256=<hex HMAC-SHA256 of the raw body, key = COMPUTE_CALLBACK_SECRET>`"
+          schema:
+            type: string
+            pattern: "^sha256=[0-9a-f]{64}$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/worker/job-status.schema.json"
+      responses:
+        "200":
+          description: Any 2xx counts as delivered.
+components:
+  securitySchemes:
+    computeKey:
+      type: http
+      scheme: bearer
+      description: |
+        `COMPUTE_API_KEY` of the worker. When set, every endpoint except `GET /health` requires it (constant-time
+        compare, never logged). A worker refuses to listen beyond loopback without a key unless `ALLOW_OPEN_BIND=1`.
+  parameters:
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[A-Za-z0-9_.-]{1,128}$"
+  responses:
+    Status:
+      description: The job's status.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/worker/job-status.schema.json"
+    Error:
+      description: Malformed body (incl. JSON NaN/Infinity), bad file name, duplicate, or a refused callbackUrl.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/worker/error.schema.json"
+    Unauthorized:
+      description: "Missing or wrong key (`WWW-Authenticate: Bearer`)."
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/worker/error.schema.json"
+    NoSuchJob:
+      description: Unknown job, or expired after its TTL / lost in a restart.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/worker/error.schema.json"

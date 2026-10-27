@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "quality": "draft",
+  "edge": 1800,
+  "frameEdge": 1800,
+  "minEdge": 960,
+  "steps": 5000,
+  "maxSplats": 1000000,
+  "minSplats": 250000,
+  "growthStop": 0.0,
+  "refineEvery": 0,
+  "growthSelectFraction": 0.0,
+  "shDegree": 3,
+  "checkpoints": 1
+}

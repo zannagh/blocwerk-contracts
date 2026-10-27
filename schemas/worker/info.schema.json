@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/worker/info.schema.json",
+  "title": "ComputeInfo",
+  "description": "GET /v1/info (authenticated): /health's fields plus operational details. 'limits' and 'tools' differ per worker.",
+  "type": "object",
+  "required": [
+    "status",
+    "service",
+    "protocol",
+    "version",
+    "kinds",
+    "gitSha",
+    "auth",
+    "jobs"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "degraded"
+      ],
+      "description": "degraded: up, but cannot run jobs (e.g. splat tools missing)."
+    },
+    "service": {
+      "type": "string",
+      "description": "'wall-geometry', 'splat-worker', ..."
+    },
+    "protocol": {
+      "type": "string",
+      "pattern": "^blocwerk-compute/[0-9]+$",
+      "description": "'blocwerk-compute/1'."
+    },
+    "version": {
+      "type": "string"
+    },
+    "kinds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The kinds this worker serves. The app uses splat-prepare/splat-finish only when both are listed."
+    },
+    "maxQuality": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "high",
+        "max",
+        "ultra"
+      ],
+      "description": "splat-worker: the highest quality it trains itself (only when its tools are ok)."
+    },
+    "prepareOutputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "splat-worker: what splat-prepare returns and accepts beyond the bundle ('sparse.zip', 'anchors'); markerless captures need both."
+    },
+    "gitSha": {
+      "type": "string"
+    },
+    "auth": {
+      "type": "boolean",
+      "description": "Whether the worker requires a key."
+    },
+    "jobs": {
+      "type": "object",
+      "required": [
+        "queued",
+        "running"
+      ],
+      "properties": {
+        "queued": {
+          "type": "integer"
+        },
+        "running": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": true
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "maxPhotos": {
+          "type": "integer",
+          "description": "The app reads this before it starts or redoes a capture."
+        }
+      },
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "tools": {
+      "type": "object",
+      "description": "splat-worker: tool paths, versions, trainer and GPU backend."
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/runner/upload-stats.schema.json",
+  "title": "RunnerUploadStats",
+  "description": "The X-Blocwerk-Stats header of PUT .../result: a flat JSON object of training stats, at most 8 KiB. Only 'retries' may be an array or object; anything else nested drops the whole header (the upload still counts).",
+  "type": "object",
+  "properties": {
+    "retries": {
+      "type": [
+        "array",
+        "object"
+      ]
+    }
+  },
+  "additionalProperties": {
+    "type": [
+      "string",
+      "number",
+      "boolean",
+      "null"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "fraction": 0.4213,
+  "step": 12000,
+  "totalSteps": 30000,
+  "stage": "train",
+  "detail": "step 12000/30000"
+}

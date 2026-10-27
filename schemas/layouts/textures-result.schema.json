@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/layouts/textures-result.schema.json",
+  "title": "TexturesResultLayout",
+  "description": "PUT .../result of a 'textures' job: a flat zip with textures.json and every file its facets name (RunnerTexturesResult), 1..257 entries. The instance is the list of the zip's entry names, in order.",
+  "type": "array",
+  "items": {
+    "type": "string",
+    "anyOf": [
+      {
+        "pattern": "^[A-Za-z0-9_.\\-]{1,128}\\.(jpg|jpeg|png|json)$"
+      }
+    ]
+  },
+  "uniqueItems": true,
+  "maxItems": 257,
+  "allOf": [
+    {
+      "contains": {
+        "type": "string",
+        "const": "textures.json"
+      }
+    }
+  ]
+}

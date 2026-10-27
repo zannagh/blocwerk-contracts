@@ -1,0 +1,18 @@
+{
+  "trainer": "brush",
+  "zoned": false,
+  "steps": 30000,
+  "splatCount": 1271332,
+  "trainingSeconds": 3120.4,
+  "quality": "max",
+  "profileNote": null,
+  "retries": [
+    {
+      "stage": "train",
+      "reason": "memory",
+      "from": "max",
+      "to": "high"
+    }
+  ],
+  "previewsUploaded": 3
+}

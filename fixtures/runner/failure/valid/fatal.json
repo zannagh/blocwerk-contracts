@@ -1,0 +1,5 @@
+{
+  "reason": "train: brush_app failed (exit code 101): out of memory",
+  "retryable": false,
+  "shutdown": false
+}

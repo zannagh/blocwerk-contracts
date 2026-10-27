@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "service": "splat",
+  "kind": "splat-finish",
+  "parts": [
+    {
+      "name": "splat",
+      "file": "C:splat.ply"
+    }
+  ]
+}

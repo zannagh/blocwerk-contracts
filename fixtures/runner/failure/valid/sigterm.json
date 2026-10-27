@@ -1,0 +1,6 @@
+{
+  "reason": "the runner is shutting down",
+  "retryable": true,
+  "shutdown": true,
+  "checkpointStep": 7000
+}

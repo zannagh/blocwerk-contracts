@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "service": "splat",
+  "kind": "splat-finish",
+  "parts": [
+    {
+      "name": "prepared",
+      "json": {
+        "version": 2,
+        "quality": "high",
+        "options": {
+          "quality": "high",
+          "maxSteps": null,
+          "maxImageEdge": null,
+          "matcher": "auto",
+          "cropMarginMm": 400.0,
+          "spz": true,
+          "colourMatch": true,
+          "cleanup": false,
+          "wallZones": false
+        },
+        "geometry": null,
+        "photoCentres": {
+          "p01": [
+            0,
+            0,
+            0
+          ],
+          "p02": [
+            1,
+            0,
+            0
+          ]
+        },
+        "frameCentres": {
+          "vf_0001": [
+            0,
+            1,
+            0
+          ]
+        },
+        "photoStems": [
+          "p01",
+          "p02",
+          "p03"
+        ],
+        "frameStems": [
+          "vf_0001"
+        ],
+        "points": 1200,
+        "meanReprojErrorPx": 0.7,
+        "matcher": "exhaustive",
+        "cameraGroups": 1,
+        "sfm": {
+          "memoryBudgetMb": 6000,
+          "memoryRetries": []
+        },
+        "stageSeconds": {
+          "ingest": 1.0
+        },
+        "zones": null
+      }
+    },
+    {
+      "name": "trainStats",
+      "json": {
+        "steps": 7000
+      }
+    },
+    {
+      "name": "splat",
+      "file": "splat.ply"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "reason": "upload: gave up after 3605 s (HTTP 502)",
+  "retryable": true,
+  "shutdown": false,
+  "unreachable": true
+}

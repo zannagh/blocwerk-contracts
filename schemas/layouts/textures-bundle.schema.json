@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/layouts/textures-bundle.schema.json",
+  "title": "TexturesBundleLayout",
+  "description": "GET .../bundle of a 'textures' job (RunnerTexturesBundle). Photos are named by their camera image, metadata-stripped and stored. The instance is the list of the zip's entry names, in order.",
+  "type": "array",
+  "items": {
+    "type": "string",
+    "anyOf": [
+      {
+        "type": "string",
+        "const": "textures-job.json"
+      },
+      {
+        "type": "string",
+        "const": "geometry.json"
+      },
+      {
+        "pattern": "^photos/[^/\\\\]+\\.(jpg|jpeg|png)$"
+      }
+    ]
+  },
+  "uniqueItems": true,
+  "allOf": [
+    {
+      "contains": {
+        "type": "string",
+        "const": "textures-job.json"
+      }
+    },
+    {
+      "contains": {
+        "type": "string",
+        "const": "geometry.json"
+      }
+    },
+    {
+      "contains": {
+        "type": "string",
+        "pattern": "^photos/"
+      }
+    }
+  ]
+}

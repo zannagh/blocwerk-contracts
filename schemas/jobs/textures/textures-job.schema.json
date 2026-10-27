@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/textures/textures-job.schema.json",
+  "title": "TexturesJob",
+  "description": "textures-job.json of a 'textures' bundle (RunnerTexturesBundle). The bundle also holds geometry.json (a solved wall-geometry document) and photos/<camera image>.jpg|png.",
+  "type": "object",
+  "required": [
+    "version",
+    "options"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "options": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/texturesOptions"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Null: the renderer's defaults."
+    }
+  },
+  "$defs": {
+    "texturesOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "wall-geometry textures options (wallgeometry/textures.py CLIENT_OPTIONS); unknown keys are refused.",
+      "properties": {
+        "mmPerPx": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 50,
+          "default": 2.0
+        },
+        "maxSidePx": {
+          "type": "integer",
+          "minimum": 256,
+          "maximum": 8192
+        },
+        "extraMarginMm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2000,
+          "default": 100
+        },
+        "jpegQuality": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 100
+        },
+        "blendViews": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Photos blended per spot (default 6)."
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

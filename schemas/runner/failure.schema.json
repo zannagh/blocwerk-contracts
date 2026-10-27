@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/runner/failure.schema.json",
+  "title": "RunnerFailure",
+  "description": "POST /api/runners/jobs/{jobId}/fail: the runner hands the job back. How the server counts it: shutdown (+pause) > unreachable > retryable > fatal.",
+  "type": "object",
+  "properties": {
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Shown to the wall's admins; clipped to 1000 characters."
+    },
+    "retryable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Another try (maybe on another runner) may succeed: costs an attempt. False: the job fails for good."
+    },
+    "shutdown": {
+      "type": "boolean",
+      "default": false,
+      "description": "The runner is stopping, not the job failing: back to the queue without using an attempt."
+    },
+    "checkpointStep": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "With shutdown: the step of the newest checkpoint the runner keeps (it resumes there). A shutdown whose checkpoint did not advance counts against a budget."
+    },
+    "unreachable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Given up because the server or network stayed out of reach: costs a lost lease, not an attempt."
+    },
+    "pause": {
+      "type": "boolean",
+      "default": false,
+      "description": "With shutdown: the owner paused the runner mid-job. Free (up to RUNNERS__MAXPAUSES per job), and the runner stays online, paused."
+    }
+  },
+  "additionalProperties": true
+}

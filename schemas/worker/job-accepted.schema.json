@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/worker/job-accepted.schema.json",
+  "title": "ComputeJobAccepted",
+  "description": "202 answer to POST /v1/jobs/{kind}.",
+  "type": "object",
+  "required": [
+    "jobId",
+    "status"
+  ],
+  "properties": {
+    "jobId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "const": "queued"
+    }
+  },
+  "additionalProperties": true
+}

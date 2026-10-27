@@ -1,0 +1,16 @@
+{
+  "facets": [
+    {
+      "facet": "facet zero",
+      "file": "facet_0.jpg",
+      "bounds": {
+        "aMin": 0,
+        "aMax": 1,
+        "bMin": 0,
+        "bMax": 1
+      },
+      "widthPx": 1,
+      "heightPx": 1
+    }
+  ]
+}

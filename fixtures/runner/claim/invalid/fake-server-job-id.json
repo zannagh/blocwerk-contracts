@@ -1,0 +1,8 @@
+{
+  "jobId": "j1",
+  "quality": "draft",
+  "leaseSeconds": 300,
+  "bundleBytes": 6,
+  "bundleSha256": "1e6ed65d77d6364eeaed5a745ba5c4985ae2b700dd85d7cf7f027bdf294a33fc",
+  "previews": true
+}

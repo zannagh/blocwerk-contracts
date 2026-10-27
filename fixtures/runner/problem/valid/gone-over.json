@@ -1,0 +1,7 @@
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.11",
+  "title": "Gone",
+  "status": 410,
+  "detail": "This job is over (cancelled, failed or finished); drop what you kept for it.",
+  "reason": "over"
+}

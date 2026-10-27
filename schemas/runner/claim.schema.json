@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/runner/claim.schema.json",
+  "title": "RunnerClaim",
+  "description": "200 answer to POST /api/runners/claim: the job this runner now holds. 'reattached': the runner already held it (it restarted) and gets it back.",
+  "type": "object",
+  "required": [
+    "jobId",
+    "quality",
+    "leaseSeconds",
+    "bundleBytes",
+    "bundleSha256"
+  ],
+  "properties": {
+    "jobId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "quality": {
+      "$ref": "#/$defs/quality",
+      "description": "Quality to train at ('draft' for kinds that do not train)."
+    },
+    "leaseSeconds": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The lease; every progress call renews it."
+    },
+    "bundleBytes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Size of GET .../bundle.",
+      "format": "int64"
+    },
+    "bundleSha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Lower-case hex SHA-256 of the bundle; the runner checks it after the download."
+    },
+    "previews": {
+      "type": "boolean",
+      "default": false,
+      "description": "The server takes intermediate splats (PUT .../preview). Only ever true for 'splat'."
+    },
+    "reattached": {
+      "type": "boolean",
+      "default": false
+    },
+    "wallId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid",
+      "description": "For the runner's local status page only (ids, never names)."
+    },
+    "captureId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "kind": {
+      "$ref": "#/$defs/kind",
+      "default": "splat",
+      "description": "Absent on servers from before textures jobs: 'splat'."
+    },
+    "requiredMemoryMb": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Memory the job needs on the runner, MB: textures (against texturesMemoryMb), splat-prepare / splat-finish (against memoryBudgetMb; 6144 / 3072 by default). Null when the kind has no memory gate."
+    }
+  },
+  "if": {
+    "properties": {
+      "kind": {
+        "not": {
+          "type": "string",
+          "const": "splat"
+        }
+      }
+    },
+    "required": [
+      "kind"
+    ]
+  },
+  "then": {
+    "properties": {
+      "previews": {
+        "type": "boolean",
+        "const": false
+      }
+    }
+  },
+  "$defs": {
+    "quality": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "high",
+        "max",
+        "ultra"
+      ],
+      "description": "Splat quality profile, lowest to highest."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "splat",
+        "textures",
+        "detect-holds",
+        "register-panels",
+        "splat-prepare",
+        "splat-finish"
+      ],
+      "description": "The job kind; equal to the capability that lets a runner claim it. 'splat-prepare' / 'splat-finish' (runner protocol 1.1) have a runner envelope as bundle and result."
+    }
+  },
+  "additionalProperties": true
+}

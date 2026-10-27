@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/layouts/envelope-input.schema.json",
+  "title": "EnvelopeInputLayout",
+  "description": "Added in runner protocol 1.1 (blocwerk staging-o7, PRs #239/#240; not on main yet): GET .../bundle of a 'splat-prepare' / 'splat-finish' job: parts.json first, then one stored entry per file part (RunnerComputeEnvelope). The instance is the list of the zip's entry names, in order.",
+  "type": "array",
+  "items": {
+    "type": "string",
+    "anyOf": [
+      {
+        "type": "string",
+        "const": "parts.json"
+      },
+      {
+        "pattern": "^[^/\\\\]{1,255}$"
+      }
+    ]
+  },
+  "uniqueItems": true,
+  "allOf": [
+    {
+      "contains": {
+        "type": "string",
+        "const": "parts.json"
+      }
+    },
+    {
+      "prefixItems": [
+        {
+          "type": "string",
+          "const": "parts.json"
+        }
+      ]
+    }
+  ],
+  "maxItems": 1431
+}

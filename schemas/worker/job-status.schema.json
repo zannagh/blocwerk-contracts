@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/worker/job-status.schema.json",
+  "title": "ComputeJobStatus",
+  "description": "GET /v1/jobs/{id} of a compute worker (protocol blocwerk-compute/1), the body of DELETE /v1/jobs/{id} and of every progress callback. Also status.json of a runner envelope result.",
+  "type": "object",
+  "required": [
+    "jobId",
+    "status"
+  ],
+  "properties": {
+    "jobId": {
+      "type": "string",
+      "description": "Worker-chosen id (32 hex digits today)."
+    },
+    "kind": {
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/state"
+    },
+    "progress": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Monotone within a run; 1.0 on success. Rounded to 3 decimals."
+    },
+    "stage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Short text for a progress label ('queued', 'done', or a kind's stage)."
+    },
+    "stageDetail": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Finer detail within the stage, e.g. 'step 1200/5000'."
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Human-readable note, e.g. why it was cancelled."
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 400,
+      "description": "Set iff status is failed; no server paths. Unexpected failures read 'internal error (ref <id>)'."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "result": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/jobResult"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Set iff status is succeeded; shape per kind (docs/protocol.md)."
+    }
+  },
+  "$defs": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "jobResult": {
+      "type": "object",
+      "description": "Per-kind fields, plus 'files' when the kind produces files.",
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/resultFile"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "description": "Workers send {name, url}; the app also reads a bare name (runner envelope results)."
+        }
+      },
+      "additionalProperties": true
+    },
+    "resultFile": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,128}$"
+        },
+        "url": {
+          "type": "string",
+          "description": "Path of GET /v1/jobs/{id}/files/{name}, relative to the worker's base URL (it starts with /v1/)."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,11 @@
+{
+  "status": "ok",
+  "service": "wall-geometry",
+  "protocol": "blocwerk-compute/1",
+  "version": "0.1.0",
+  "kinds": [
+    "solve",
+    "solve-sfm",
+    "textures"
+  ]
+}

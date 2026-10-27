@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/register-panels/panels-result.schema.json",
+  "title": "PanelsResult",
+  "description": "The result of a 'register-panels' job: PUT .../result with this JSON (gzip allowed), at most 4 MiB (RunnerPanelPoses). A panel that did not register is left out.",
+  "type": "object",
+  "required": [
+    "version",
+    "panels"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "panels": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[0-9A-Fa-f]{32}r[0-9]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/panelPose"
+      }
+    }
+  },
+  "$defs": {
+    "panelPose": {
+      "type": "object",
+      "required": [
+        "width",
+        "height",
+        "params",
+        "R",
+        "t",
+        "observations",
+        "rmsPx",
+        "medianPx"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "params": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 5,
+          "maxItems": 5,
+          "description": "COLMAP RADIAL: [f, cx, cy, k1, k2]."
+        },
+        "R": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 9,
+          "maxItems": 9
+        },
+        "t": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "observations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "rmsPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "maxItems": 1
+            }
+          ],
+          "description": "A number (or a one-element array)."
+        },
+        "medianPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "maxItems": 1
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

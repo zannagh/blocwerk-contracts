@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/runner/progress.schema.json",
+  "title": "RunnerProgress",
+  "description": "POST /api/runners/jobs/{jobId}/progress: the lease heartbeat. Send at least once per lease (the Python runner sends every 30 s). Every field is optional.",
+  "type": "object",
+  "properties": {
+    "fraction": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "0..1; clamped; non-finite values are ignored."
+    },
+    "step": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "totalSteps": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "stage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "'download' and 'upload' have fixed meanings (an 'upload' extends the job deadline); anything else reads as the kind's working stage (e.g. 'train', 'textures')."
+    },
+    "detail": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Shown after the stage, clipped to 80 characters; a detail starting with 'step ' is dropped (the server prints the step itself)."
+    }
+  },
+  "additionalProperties": true
+}

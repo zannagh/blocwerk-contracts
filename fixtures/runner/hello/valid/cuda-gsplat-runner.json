@@ -1,0 +1,20 @@
+{
+  "runnerVersion": "0.1.0",
+  "gpuName": "NVIDIA GeForce RTX 4070 Ti SUPER",
+  "vramMb": 16376,
+  "maxQuality": "ultra",
+  "memoryBudgetMb": 19200,
+  "platform": "Linux x86_64",
+  "trainer": "gsplat",
+  "cuda": true,
+  "trainerVersion": "1.5.3",
+  "capabilities": [
+    "splat",
+    "textures",
+    "detect-holds",
+    "register-panels",
+    "splat-prepare",
+    "splat-finish"
+  ],
+  "texturesMemoryMb": 12288
+}

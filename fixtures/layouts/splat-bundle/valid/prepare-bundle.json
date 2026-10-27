@@ -1,0 +1,9 @@
+[
+  "train.json",
+  "zones.json",
+  "dataset/images/cam-a/p01.jpg",
+  "dataset/images/video/vf_0001.jpg",
+  "dataset/sparse/0/cameras.bin",
+  "dataset/sparse/0/images.bin",
+  "dataset/sparse/0/points3D.bin"
+]

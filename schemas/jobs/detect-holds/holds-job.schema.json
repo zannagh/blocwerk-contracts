@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/detect-holds/holds-job.schema.json",
+  "title": "HoldsJob",
+  "description": "holds-job.json of a 'detect-holds' bundle (RunnerHoldsBundle). The bundle also holds model.onnx (the app's detector) and photos/<camera image>.jpg|png. The runner replays the app's tiled detection box for box.",
+  "type": "object",
+  "required": [
+    "version",
+    "tiling",
+    "wholeImageConfidence",
+    "windowIoU"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "tiling": {
+      "$ref": "#/$defs/tiling"
+    },
+    "wholeImageConfidence": {
+      "type": "number",
+      "description": "Confidence when tiling is off (0.25)."
+    },
+    "windowIoU": {
+      "type": "number",
+      "description": "IoU of the per-window NMS (0.45)."
+    }
+  },
+  "$defs": {
+    "tiling": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "tileSize",
+        "overlap",
+        "confidence",
+        "sampling"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "tileSize": {
+          "type": "integer"
+        },
+        "overlap": {
+          "type": "integer"
+        },
+        "confidence": {
+          "type": "number"
+        },
+        "sampling": {
+          "type": "string",
+          "description": "Only 'nearest' is sent while tiling is on (other settings are detected in the app)."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

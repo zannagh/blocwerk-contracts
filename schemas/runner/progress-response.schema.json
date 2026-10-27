@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/runner/progress-response.schema.json",
+  "title": "RunnerProgressResponse",
+  "description": "200 answer to a progress call.",
+  "type": "object",
+  "required": [
+    "cancel",
+    "leaseSeconds"
+  ],
+  "properties": {
+    "cancel": {
+      "type": "boolean",
+      "description": "Always false today; a cancelled job answers 410 instead."
+    },
+    "leaseSeconds": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "additionalProperties": true
+}

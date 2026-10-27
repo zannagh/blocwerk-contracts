@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/worker/splat-options.schema.json",
+  "title": "SplatOptions",
+  "description": "The 'options' JSON part of POST /v1/jobs/splat and /v1/jobs/splat-prepare (splat-worker options.py). Unknown keys are refused (422).",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "quality": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "high",
+        "max",
+        "ultra"
+      ],
+      "default": "high"
+    },
+    "maxSteps": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 100000,
+      "description": "Overrides the profile's steps."
+    },
+    "maxImageEdge": {
+      "type": "integer",
+      "minimum": 480,
+      "maximum": 4096,
+      "description": "Overrides the profile's photo edge."
+    },
+    "matcher": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "exhaustive",
+        "sequential",
+        "pairs"
+      ],
+      "default": "auto"
+    },
+    "cropMarginMm": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5000,
+      "default": 400
+    },
+    "spz": {
+      "type": "boolean",
+      "default": true
+    },
+    "colourMatch": {
+      "type": "boolean",
+      "default": true
+    },
+    "cleanup": {
+      "type": "boolean",
+      "default": false,
+      "description": "Floater clean-up; needs 'geometry'."
+    },
+    "wallZones": {
+      "type": "boolean",
+      "default": false,
+      "description": "gsplat trains and exports with the wall zones; needs 'geometry'."
+    }
+  }
+}

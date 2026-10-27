@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "quality": "ultra",
+  "edge": 4096,
+  "frameEdge": 1920,
+  "minEdge": 3000,
+  "steps": 50000,
+  "maxSplats": 6000000,
+  "minSplats": 3000000,
+  "growthStop": 0.5,
+  "refineEvery": 0,
+  "growthSelectFraction": 0.2,
+  "shDegree": 0,
+  "checkpoints": 3
+}

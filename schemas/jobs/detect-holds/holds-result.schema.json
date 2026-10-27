@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/detect-holds/holds-result.schema.json",
+  "title": "HoldsResult",
+  "description": "The result of a 'detect-holds' job: PUT .../result with this JSON (gzip allowed), at most 64 MiB (RunnerHoldsResult). Boxes are in the photo's pixels; the server turns them into holds (volumes and mat false positives dropped).",
+  "type": "object",
+  "required": [
+    "version",
+    "photos"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "photos": {
+      "type": "object",
+      "maxProperties": 10000,
+      "propertyNames": {
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/photoBoxes"
+      },
+      "description": "Camera image name (case-insensitive) -> its boxes."
+    }
+  },
+  "$defs": {
+    "photoBoxes": {
+      "type": "object",
+      "required": [
+        "width",
+        "height",
+        "boxes"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "boxes": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "[left, top, right, bottom, confidence, label]: integer pixels (right >= left, bottom >= top), confidence 0..1, label 'volume' or anything else (a hold).",
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
