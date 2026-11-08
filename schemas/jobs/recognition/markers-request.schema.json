@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/markers-request.schema.json",
+  "title": "MarkersRequest",
+  "description": "The 'request' part of a 'markers' job (runner protocol 1.2; part 'photo', one image): MarkerDetectionOptions. Absent options keep the detector's defaults.",
+  "type": "object",
+  "required": ["version"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "options": {
+      "type": "object",
+      "properties": {
+        "allowedIds": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 0},
+          "uniqueItems": true,
+          "description": "The ids that may appear (default 0..35); any other decoded id is a false positive."
+        },
+        "minSidePx": {"type": "number", "description": "Candidates with a smaller mean side are rejected (20)."},
+        "maxEdgeRatio": {"type": "number", "description": "Longest / shortest edge above this is rejected (4)."},
+        "refineCorners": {
+          "type": "boolean",
+          "description": "Re-fit corners as intersections of the square's edge lines (true)."
+        },
+        "minQuietZoneContrast": {"type": "number", "description": "Lowest quiet-zone contrast (-0.5; 0.1 for plan-printed markers)."},
+        "brightenedPass": {"type": "boolean", "description": "Also decode on a brightened copy (false)."}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

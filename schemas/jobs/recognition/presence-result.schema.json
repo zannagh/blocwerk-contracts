@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/presence-result.schema.json",
+  "title": "PresenceResult",
+  "description": "The result of a 'presence' job (runner protocol 1.2): one score per query, in request order.",
+  "type": "object",
+  "required": ["version", "scores"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "scores": {
+      "type": "array",
+      "items": {"type": ["number", "null"], "minimum": -1, "maximum": 1},
+      "description": "Best normalized cross-correlation in [-1, 1]; null when too little of either photo surrounds the spot."
+    }
+  },
+  "additionalProperties": true
+}

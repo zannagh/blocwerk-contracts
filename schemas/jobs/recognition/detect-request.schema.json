@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/detect-request.schema.json",
+  "title": "DetectRequest",
+  "description": "The 'request' part of a 'detect-holds@2' job (runner protocol 1.2): jobs/detect-holds/holds-job plus the model, which is fetched by hash (GET /api/runners/models/{sha256}) instead of travelling in the bundle. The result is jobs/detect-holds/holds-result, unchanged: camera image name = the photo part's file name.",
+  "allOf": [{"$ref": "../detect-holds/holds-job.schema.json"}],
+  "required": ["model"],
+  "properties": {"model": {"$ref": "#/$defs/model"}},
+  "$defs": {
+    "model": {
+      "type": "object",
+      "required": ["name", "sha256"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name; detections are stored under 'yolo-runner:<first 12 of sha256>'."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Lower-case hex SHA-256 of the ONNX model. A runner whose cached model has another hash fetches this one."
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

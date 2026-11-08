@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/match-result.schema.json",
+  "title": "MatchResult",
+  "description": "The result of a 'match-panels' job (runner protocol 1.2): HoldOverlapResult. Proposals are sorted by descending confidence.",
+  "type": "object",
+  "required": ["version", "proposals", "unmatchedLeft", "unmatchedRight"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "proposals": {"type": "array", "items": {"$ref": "#/$defs/proposal"}},
+    "unmatchedLeft": {"type": "array", "items": {"type": "integer"}},
+    "unmatchedRight": {"type": "array", "items": {"type": "integer"}},
+    "warpedLeftPositions": {
+      "type": ["array", "null"],
+      "items": {"type": ["array", "null"], "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+      "description": "One normalized [x, y] per left hold, in request order; null where the warp field could not predict."
+    },
+    "warpedLeftShapes": {
+      "type": ["array", "null"],
+      "items": {
+        "type": ["array", "null"],
+        "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}}
+      },
+      "description": "One outline per left hold, in request order; null for a hold without a custom shape."
+    }
+  },
+  "$defs": {
+    "proposal": {
+      "type": "object",
+      "required": ["leftHoldId", "rightHoldId", "confidence", "moved", "residualPx"],
+      "properties": {
+        "leftHoldId": {"type": "integer"},
+        "rightHoldId": {"type": "integer"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "moved": {"type": "boolean"},
+        "residualPx": {"type": "number"},
+        "rescue": {
+          "type": ["string", "null"],
+          "description": "Set only for low-confidence rescues (for example 'colour')."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "proposals": [{"leftHoldId": 1, "rightHoldId": 1, "confidence": 1.5, "moved": false, "residualPx": 0}],
+  "unmatchedLeft": [],
+  "unmatchedRight": []
+}

@@ -8,11 +8,11 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
 class Capability(
-    RootModel[Literal['splat', 'textures', 'detect-holds', 'register-panels', 'splat-prepare', 'splat-finish']]
+    RootModel[Literal['splat', 'textures', 'detect-holds', 'register-panels', 'splat-prepare', 'splat-finish', 'detect-holds@2', 'outline-holds', 'markers', 'match-panels', 'presence', 'texture-match']]
 ):
-    root: Literal['splat', 'textures', 'detect-holds', 'register-panels', 'splat-prepare', 'splat-finish']
+    root: Literal['splat', 'textures', 'detect-holds', 'register-panels', 'splat-prepare', 'splat-finish', 'detect-holds@2', 'outline-holds', 'markers', 'match-panels', 'presence', 'texture-match']
     """
-    A job kind a runner may advertise. 'splat-prepare' / 'splat-finish': added in runner protocol 1.1 (blocwerk staging-o7, prs #239/#240; not on main yet).
+    A job kind a runner may advertise. 'splat-prepare' / 'splat-finish': added in runner protocol 1.1 (blocwerk staging-o7, prs #239/#240; not on main yet). Runner protocol 1.2 adds the recognition kinds 'detect-holds@2', 'outline-holds', 'markers', 'match-panels', 'presence' and 'texture-match' (runner envelope bundle, inline JSON result); an instance runner may advertise these only.
     """
 
 
@@ -45,7 +45,7 @@ class RunnerHello(BaseModel):
     """
     memory_budget_mb: Annotated[int | None, Field(alias='memoryBudgetMb')] = None
     """
-    Host memory the runner may use, MB. Kept only when 0 < value < 10000000. From runner protocol 1.1 the server offers 'splat-prepare' / 'splat-finish' jobs only when it covers the job's requiredMemoryMb.
+    Host memory the runner may use, MB. Kept only when 0 < value < 10000000. From runner protocol 1.1 the server offers 'splat-prepare' / 'splat-finish' jobs, and from 1.2 the recognition kinds, only when it covers the job's requiredMemoryMb.
     """
     platform: str | None = None
     """

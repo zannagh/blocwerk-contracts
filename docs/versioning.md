@@ -5,9 +5,9 @@
 | thing | version | where it is visible on the wire |
 |---|---|---|
 | this repository (schemas, OpenAPI, generated packages) | semver tag `vX.Y.Z` | the NuGet / wheel version consumers pin |
-| runner protocol | `MAJOR.MINOR` (today **1.1**) | **not on the wire yet**: negotiated through `capabilities` and response fields (below) |
+| runner protocol | `MAJOR.MINOR` (today **1.2**) | **not on the wire yet**: negotiated through `capabilities` and response fields (below) |
 | compute job API | `blocwerk-compute/N` (today 1) | `GET /health` → `protocol` |
-| each job document | `"version": N` inside the document | `train.json`, `textures-job.json`, `holds-job.json`, `register-job.json`, holds / panels results, `parts.json` (all 1 today; `prepared.json` is 2 and server-internal) |
+| each job document | `"version": N` inside the document | `train.json`, `textures-job.json`, `holds-job.json`, `register-job.json`, holds / panels results, `parts.json` (all 1 today, as are the recognition request and result documents; `prepared.json` is 2 and server-internal) |
 
 The runner protocol history:
 
@@ -15,6 +15,7 @@ The runner protocol history:
 |---|---|---|
 | 1.0 | hello / claim / bundle / progress / result / preview / fail; kinds `splat`, `textures`, `detect-holds`, `register-panels`; pause | `main` |
 | 1.1 | kinds `splat-prepare`, `splat-finish`; the runner envelope; per-kind result caps | `staging-o7` (PRs #239, #240) |
+| 1.2 | recognition kinds `detect-holds@2`, `outline-holds`, `markers`, `match-panels`, `presence`, `texture-match` (envelope `service: "recognition"`); `GET /api/runners/models/{sha256}`; the instance runner; `leaseSeconds` per lane; API mapped whenever recognition is on (repository `v0.2.0`) | recognition queue, PRs R2–R6 |
 
 ## Rules
 
@@ -32,7 +33,13 @@ The runner protocol history:
    and major until those runners are gone.
 6. **Documents inside a job carry their own `version`.** A reader refuses a version it does not know (the runner's
    `train.json` reader does) rather than guessing. A breaking document change bumps that `version` and is paired with a
-   new capability (rule 3), so only runners that understand it receive it.
+   new capability (rule 3), so only runners that understand it receive it. A changed bundle layout counts as breaking.
+   Worked example, runner protocol 1.2: the 1.0 `detect-holds` bundle ships `model.onnx` (~100 MB) with every job,
+   which is right for a 425-photo capture and wrong for one interactive photo. Dropping the model from the bundle would
+   break every 1.0 runner, so it is a new capability, `detect-holds@2`: its bundle is an envelope with the model named
+   by hash (`GET /api/runners/models/{sha256}`). The server offers `detect-holds` to runners that only advertise that
+   and `detect-holds@2` to those that advertise it; the 1.0 schemas, fixtures and capture jobs stay until the last 1.0
+   runner is gone.
 
 ## Capability negotiation (today)
 
@@ -41,7 +48,7 @@ There is no version number in `hello`. Compatibility is negotiated per feature:
 | question | how it is answered |
 |---|---|
 | May this runner get kind K? | its hello lists capability K (equal to the kind name). The server stores only names it knows; no list or no known name means `splat` only. So a new kind is invisible to old runners, and a new runner's unknown capability is dropped by an old server. |
-| Does it have the resources for this job? | per kind: `textures` → `requiredMemoryMb` ≤ hello `texturesMemoryMb`; `splat-prepare` / `splat-finish` → `requiredMemoryMb` ≤ hello `memoryBudgetMb`; `splat` → job quality ≤ `min(hello.maxQuality, claim.maxQuality)` (the server lowers `maxQuality` to what trainer and VRAM support); bundle size ≤ claim `maxBundleBytes`. |
+| Does it have the resources for this job? | per kind: `textures` → `requiredMemoryMb` ≤ hello `texturesMemoryMb`; `splat-prepare` / `splat-finish` and the 1.2 recognition kinds → `requiredMemoryMb` ≤ hello `memoryBudgetMb`; `splat` → job quality ≤ `min(hello.maxQuality, claim.maxQuality)` (the server lowers `maxQuality` to what trainer and VRAM support); bundle size ≤ claim `maxBundleBytes`. |
 | Does the server understand pausing? | the hello answer has `pauseAware: true`. Without it the runner does not send paused hellos. |
 | Does the server know `reason` on 410? | `reason` present. Without it a runner treats a `410` as `requeued` (keeps checkpoints). |
 | Was this claim made by an older server? | no `kind` → `splat`; no `previews` → false; no `requiredMemoryMb` → no memory gate. |

@@ -32,7 +32,7 @@ namespace Blocwerk.Contracts.Compute.Runner
         public string Quality { get; init; } = default!;
 
         /// <summary>
-        /// The lease; every progress call renews it.
+        /// The lease; every progress call renews it. Varies per lane: 30 s for the interactive lane (heartbeat every 5 s), 120 s for the background lane (30 s), 300 s for the other kinds.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("leaseSeconds")]
         public int LeaseSeconds { get; init; } = default!;
@@ -74,7 +74,7 @@ namespace Blocwerk.Contracts.Compute.Runner
         public string? Kind { get; init; } = default!;
 
         /// <summary>
-        /// Memory the job needs on the runner, MB: textures (against texturesMemoryMb), splat-prepare / splat-finish (against memoryBudgetMb; 6144 / 3072 by default). Null when the kind has no memory gate.
+        /// Memory the job needs on the runner, MB: textures (against texturesMemoryMb), splat-prepare / splat-finish (against memoryBudgetMb; 6144 / 3072 by default) and the recognition kinds (against memoryBudgetMb; estimated from the photos' pixel counts). Null when the kind has no memory gate.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("requiredMemoryMb")]
         public int? RequiredMemoryMb { get; init; } = default!;
@@ -106,5 +106,17 @@ namespace Blocwerk.Contracts.Compute.Runner
         public const string SplatPrepare = "splat-prepare";
 
         public const string SplatFinish = "splat-finish";
+
+        public const string DetectHolds2 = "detect-holds@2";
+
+        public const string OutlineHolds = "outline-holds";
+
+        public const string Markers = "markers";
+
+        public const string MatchPanels = "match-panels";
+
+        public const string Presence = "presence";
+
+        public const string TextureMatch = "texture-match";
     }
 }

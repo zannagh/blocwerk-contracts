@@ -41,7 +41,7 @@ class Part2(BaseModel):
 
 class EnvelopeParts(BaseModel):
     """
-    Added in runner protocol 1.1 (blocwerk staging-o7, PRs #239/#240; not on main yet): parts.json, the first entry of a runner envelope: the bundle of a 'splat-prepare' / 'splat-finish' job. It is the multipart request the HTTP worker would have received; each part is a file (a stored zip entry of that name) or an inline JSON field. A runner refuses a part name its kind does not take.
+    Added in runner protocol 1.1 (blocwerk staging-o7, PRs #239/#240; not on main yet): parts.json, the first entry of a runner envelope: the bundle of a 'splat-prepare' / 'splat-finish' job and, from runner protocol 1.2, of the recognition kinds (service 'recognition'). It is the multipart request the HTTP worker would have received; each part is a file (a stored zip entry of that name) or an inline JSON field. A runner refuses a part name its kind does not take.
     """
 
     model_config = ConfigDict(
@@ -49,8 +49,8 @@ class EnvelopeParts(BaseModel):
         populate_by_name=True,
     )
     version: Literal[1]
-    service: Literal['splat']
-    kind: Literal['splat-prepare', 'splat-finish']
+    service: Literal['splat', 'recognition']
+    kind: Literal['splat-prepare', 'splat-finish', 'detect-holds@2', 'outline-holds', 'markers', 'match-panels', 'presence', 'texture-match']
     parts: list[Part1 | Part2]
     """
     In the order of the original request; a part name may repeat (photos), file names are unique ignoring case.

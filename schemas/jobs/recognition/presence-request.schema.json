@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/presence-request.schema.json",
+  "title": "PresenceRequest",
+  "description": "The 'request' part of a 'presence' job (runner protocol 1.2; parts 'old' and 'new', one image each): the PresenceQuery list of IHoldPresenceProbe.Score, in raw pixels of each photo.",
+  "type": "object",
+  "required": ["version", "queries"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "queries": {"type": "array", "maxItems": 5000, "items": {"$ref": "#/$defs/query"}}
+  },
+  "$defs": {
+    "query": {
+      "type": "object",
+      "required": ["newX", "newY", "oldX", "oldY", "scale"],
+      "properties": {
+        "newX": {"type": "number"},
+        "newY": {"type": "number"},
+        "oldX": {"type": "number"},
+        "oldY": {"type": "number"},
+        "scale": {"type": "number", "exclusiveMinimum": 0, "description": "Old pixels per new pixel."},
+        "radiusPx": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Radius on the new photo of the hold asked about; 0 keeps the fixed patch sizes."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

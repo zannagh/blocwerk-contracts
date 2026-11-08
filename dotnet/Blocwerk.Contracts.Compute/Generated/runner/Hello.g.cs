@@ -47,7 +47,7 @@ namespace Blocwerk.Contracts.Compute.Runner
         public string? MaxQuality { get; init; } = default!;
 
         /// <summary>
-        /// Host memory the runner may use, MB. Kept only when 0 &lt; value &lt; 10000000. From runner protocol 1.1 the server offers 'splat-prepare' / 'splat-finish' jobs only when it covers the job's requiredMemoryMb.
+        /// Host memory the runner may use, MB. Kept only when 0 &lt; value &lt; 10000000. From runner protocol 1.1 the server offers 'splat-prepare' / 'splat-finish' jobs, and from 1.2 the recognition kinds, only when it covers the job's requiredMemoryMb.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("memoryBudgetMb")]
         public int? MemoryBudgetMb { get; init; } = default!;
@@ -127,5 +127,17 @@ namespace Blocwerk.Contracts.Compute.Runner
         public const string SplatPrepare = "splat-prepare";
 
         public const string SplatFinish = "splat-finish";
+
+        public const string DetectHolds2 = "detect-holds@2";
+
+        public const string OutlineHolds = "outline-holds";
+
+        public const string Markers = "markers";
+
+        public const string MatchPanels = "match-panels";
+
+        public const string Presence = "presence";
+
+        public const string TextureMatch = "texture-match";
     }
 }

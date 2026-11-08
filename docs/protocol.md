@@ -4,7 +4,7 @@ How the Blocwerk app talks to the machines that do its heavy work. There are two
 
 | API | direction | who | spec |
 |---|---|---|---|
-| **Runner API** (runner protocol 1.1) | the runner pulls from the app | 3D/compute runners (`gpurunner`, in a home, on a GPU box, someone else's machine) | [`openapi/runner-api.yaml`](../openapi/runner-api.yaml) |
+| **Runner API** (runner protocol 1.2) | the runner pulls from the app | 3D/compute runners (`gpurunner`, in a home, on a GPU box, someone else's machine) and recognition runners (the always-on instance runner, optional external ones) | [`openapi/runner-api.yaml`](../openapi/runner-api.yaml) |
 | **Compute job API** (`blocwerk-compute/1`) | the app pushes to a worker | `wall-geometry`, `splat-worker` (next to the app, or reachable by URL) | [`openapi/compute-job-api.yaml`](../openapi/compute-job-api.yaml) |
 
 The payloads of both are JSON Schemas in [`schemas/`](../schemas); zip bundles and results are described as entry
@@ -13,7 +13,8 @@ change: [`versioning.md`](versioning.md). Where the code and older docs disagree
 
 This document replaces blocwerk's `docker/compute-jobs-protocol.md` (which covered the compute job API and the runner
 envelope) and the runner sections of `docker/splat-worker/README.md`. It describes what the code does as of blocwerk
-`main` at `b3bde069` plus `staging-o7` at `373676d3` (runner protocol 1.1).
+`main` at `b3bde069` plus `staging-o7` at `373676d3` (runner protocol 1.1). Runner protocol 1.2 (the recognition kinds, §1.4/§1.5)
+is specified here ahead of its implementation (blocwerk recognition queue, PRs R2–R6).
 
 ---
 
@@ -34,7 +35,10 @@ pushes: everything a runner does starts with its own request.
   10 s). A throttled call gets `429` with `Retry-After: 10`.
 - Every job-scoped call re-checks eligibility (runner not revoked, owner still administers the wall, approval still
   valid). A runner that lost the right gets `410` at its next call.
-- The whole API is absent when the server runs with `RUNNERS__MODE=off`.
+- The API is mapped whenever recognition is on (always, from 1.2). `RUNNERS__MODE=off` then only stops the 3D kinds
+  (`splat`, `textures`, `splat-prepare`, `splat-finish`) from being offered and hides runner sign-up; before 1.2 it
+  unmapped the whole API.
+- The instance runner authenticates with a key from the deployment, not a `bwr_` key (§1.5).
 
 ### 1.2 Lifecycle
 
@@ -61,7 +65,7 @@ hello ──► claim (long-poll ~25 s) ──204──► claim …
 3. **`GET /api/runners/jobs/{id}/bundle`**: the input zip; `Range` supported (resume). Check `bundleBytes` and
    `bundleSha256`. A bundle missing on the server fails the job (`410 over`).
 4. **`POST /api/runners/jobs/{id}/progress`** ([`runner/progress`](../schemas/runner/progress.schema.json)): the lease
-   heartbeat (lease 5 min; the Python runner sends every 30 s). `stage: "download"` / `"upload"` are fixed meanings
+   heartbeat (lease 5 min, or 30 s / 120 s for the recognition kinds, see §1.4 "Lanes and leases"; the Python runner sends every 30 s). `stage: "download"` / `"upload"` are fixed meanings
    (`upload` extends the deadline so a big upload is not cut off); any other stage reads as the kind's working stage.
    Answer: [`runner/progress-response`](../schemas/runner/progress-response.schema.json) (`cancel` is always false; a
    cancelled job answers `410`).
@@ -99,8 +103,9 @@ hello ──► claim (long-poll ~25 s) ──204──► claim …
 
 Older servers send `410` without `reason`: treat it as `requeued`.
 
-**Deadlines.** A claim may run `RUNNERS__MAXJOBHOURS` (6 h; `splat-prepare` 10 h). A lease not renewed within 5 min
-puts the job back in the queue.
+**Deadlines.** A claim may run `RUNNERS__MAXJOBHOURS` (6 h; `splat-prepare` 10 h; the recognition kinds: 60–90 s
+interactive, 30 min background, §1.4). A lease not renewed within the claim's `leaseSeconds` (5 min unless it says
+otherwise) puts the job back in the queue.
 
 ### 1.3 Pause
 
@@ -111,7 +116,7 @@ runner says `paused` once and then stays silent while paused (it shows offline t
 
 ### 1.4 Job kinds
 
-A runner is offered a kind only when its hello lists the capability of the same name. The server keeps only names it
+A runner is offered a kind only when its hello lists the capability of the same name (`detect-holds@2` included: the `@` is part of the name). The server keeps only names it
 knows; a runner with no list (or no known name) counts as `splat` only. This is how old runners and new servers (and
 the other way round) stay compatible (see [`versioning.md`](versioning.md)).
 
@@ -123,9 +128,49 @@ the other way round) stay compatible (see [`versioning.md`](versioning.md)).
 | `register-panels` | 1.0 | — | [`layouts/panels-bundle`](../schemas/layouts/panels-bundle.schema.json): `register-job.json` ([`jobs/register-panels/register-job`](../schemas/jobs/register-panels/register-job.schema.json)), `photos/<camera>.jpg`, `panels/<id>r<rev>.jpg`, ≤ 8 GiB | JSON [`jobs/register-panels/panels-result`](../schemas/jobs/register-panels/panels-result.schema.json), ≤ 4 MiB |
 | `splat-prepare` | 1.1 | `requiredMemoryMb` (6144) ≤ hello `memoryBudgetMb` | runner envelope (§2) | envelope result: `bundle.zip`, `prepared.json`, `sparse.zip` |
 | `splat-finish` | 1.1 | `requiredMemoryMb` (3072) ≤ hello `memoryBudgetMb` | runner envelope (§2) | envelope result: `wall.splat`, `wall.spz`, `wall.raw.spz`, `frame.json` |
+| `detect-holds@2` | 1.2 | `requiredMemoryMb` ≤ hello `memoryBudgetMb` | runner envelope (§2), `service: "recognition"`: `photos` (1..8), `request` ([`jobs/recognition/detect-request`](../schemas/jobs/recognition/detect-request.schema.json): `holds-job` + `model {name, sha256}`) | envelope result, `result` = [`jobs/detect-holds/holds-result`](../schemas/jobs/detect-holds/holds-result.schema.json) |
+| `outline-holds` | 1.2 | same | envelope: `photo` (1), `request` ([`outline-request`](../schemas/jobs/recognition/outline-request.schema.json)) | `result` = [`outline-result`](../schemas/jobs/recognition/outline-result.schema.json) |
+| `markers` | 1.2 | same | envelope: `photo` (1), `request` ([`markers-request`](../schemas/jobs/recognition/markers-request.schema.json)) | `result` = [`markers-result`](../schemas/jobs/recognition/markers-result.schema.json) |
+| `match-panels` | 1.2 | same | envelope: `left`, `right`, `request` ([`match-request`](../schemas/jobs/recognition/match-request.schema.json)) | `result` = [`match-result`](../schemas/jobs/recognition/match-result.schema.json) |
+| `presence` | 1.2 | same | envelope: `old`, `new`, `request` ([`presence-request`](../schemas/jobs/recognition/presence-request.schema.json)) | `result` = [`presence-result`](../schemas/jobs/recognition/presence-result.schema.json) |
+| `texture-match` | 1.2 | same | envelope: `photo`, `texture`, optional `mask`, `request` ([`texture-match-request`](../schemas/jobs/recognition/texture-match-request.schema.json)) | `result` = [`texture-match-result`](../schemas/jobs/recognition/texture-match-result.schema.json) |
 
 Kinds other than `splat` are claimed at quality `draft` and never get previews. The server rebuilds every bundle it
 sends: entries are allow-listed, photos are metadata-stripped (no GPS, no serials) and stored uncompressed.
+
+**Recognition kinds (1.2).** Short, CPU-bound jobs on photos, served by the instance runner (§1.5) and by any runner that
+advertises the capability; the 1.0 `detect-holds` stays for capture-sized jobs and old runners. All six use the runner
+envelope (§2) as bundle and an envelope result (a zip holding only `status.json`, `status: "succeeded"`, the kind's
+document inline as `result`; the cap counts the zip). Every request and result document carries `"version": 1`. Pixel
+coordinates are in the photo as sent, after EXIF orientation, except `texture-match`, which reads its photo without
+orientation, like hold positions.
+
+- **`detect-holds@2`** replaces the 1.0 bundle's `model.onnx` (~100 MB per job) with a hash: the request names the
+  model, the runner fetches it once from `GET /api/runners/models/{sha256}` (Range supported) and caches it, and a
+  runner whose cached hash differs fetches again. Detections stay keyed `yolo-runner:<first 12 of sha256>`. This is the
+  rule-6 example in [`versioning.md`](versioning.md): a changed bundle layout is a new capability, not a changed one.
+- **`outline-holds`** and **`markers`** are the batch forms of the app's outliner and marker detector: geometry only, the
+  app plans and writes. A seed that cannot be outlined is an entry with `failure`, not a failed job. **`texture-match`**
+  takes one facet per job (several could become `textures[]` later, additively).
+- Memory: the server sets `requiredMemoryMb` from the image headers (about 300 MB + width × height × 12 B) and offers the
+  job only to a runner whose hello `memoryBudgetMb` covers it. A runner that runs out reports `fail` with
+  `failureKind: "resource"`, which is not retried on that runner.
+
+**Lanes and leases.** A recognition job is `interactive` (a person waits) or `background`; the server picks interactive
+before background, then oldest first. The lane shows only in the claim's `leaseSeconds`: 30 (heartbeat every 5 s)
+interactive, 120 (heartbeat every 30 s) background, 300 for the other kinds. A runner uses what the claim says. An
+interactive job nobody claims within 20 s is cancelled by the app; a background job stays queued. After the claim,
+`detect-holds@2` may run 90 s per photo and the other interactive kinds 60 s; a background job 30 min. Attempts: 2
+interactive, 3 background.
+
+### 1.5 Instance runner
+
+The recognition pod that ships with a deployment is a runner whose **scope is the instance**. It is owned by no user,
+never listed in or shared through the runners UI, may serve every wall, and is offered recognition kinds only. Its key
+is not a `bwr_` key: the deployment sets it (`RECOGNITION__INSTANCEKEY`, shared by app and pod) and the app stores only
+its hash. Everything else is the ordinary protocol: hello, claim, the same refusals, a per-process `X-Blocwerk-Claim`
+token (so more replicas can share the key). External runners (a home PC, a Mac) keep `bwr_` keys and the per-wall rules,
+and may advertise the recognition capabilities next to their 3D ones; when one is online it soaks up background work.
 
 **`splat`.** The training bundle is the splat worker's `splat-prepare` `bundle.zip`, rebuilt by the server
 (`RunnerBundle`): at most 20000 entries, 8 GiB uncompressed, 256 MiB per entry. The server accepts any subset of the
@@ -143,10 +188,10 @@ bundle, and the panel photo names `<panel id, 32 hex>r<photo revision>`. A pose 
 
 ---
 
-## 2. Runner envelope (runner protocol 1.1)
+## 2. Runner envelope (runner protocol 1.1, recognition parts 1.2)
 
 How a `splat-prepare` / `splat-finish` request and its result cross the runner API, so a server without a splat
-worker can have a runner do the CPU halves. The runner runs the same job function the HTTP worker runs. Both
+worker can have a runner do the CPU halves. From 1.2 the recognition kinds use it too (`service: "recognition"`). The runner runs the same job function the HTTP worker runs. Both
 directions are flat zips. Server: `RunnerComputeEnvelope.cs`, `RunnerComputeResult.cs`; runner:
 `gpurunner/compute_envelope.py`.
 
@@ -173,6 +218,15 @@ The multipart request the HTTP worker would have received, as one zip
 - Part names: `splat-prepare` takes `photos` (photos, `vf_…` video frames and `a00…` anchor photos all travel as
   `photos`), `geometry`, `options`; `splat-finish` takes `prepared` (json), `splat` (`splat.ply` or `splat.spz`),
   `trainStats` (json). A runner refuses any other part name.
+  Recognition kinds (`service: "recognition"`, 1.2) take `request` (json, the kind's request document) and image files:
+
+  | kind | file parts |
+  |---|---|
+  | `detect-holds@2` | `photos` (1..8; the file name is the camera image name in the result) |
+  | `outline-holds`, `markers` | `photo` |
+  | `match-panels` | `left`, `right` |
+  | `presence` | `old`, `new` |
+  | `texture-match` | `photo`, `texture`, optional `mask` |
 
 ### 2.2 Result: `status.json` + the files it lists
 
@@ -183,7 +237,7 @@ The server refuses the upload (`422`, the claim stays) when it is not a zip, has
 is not `[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}` with `.zip .json .splat .spz .ply`, a name repeats (ignoring case), a file
 other than `status.json` is compressed, an entry is not listed or a listed file is missing, `status.json` is over
 4 MiB or not JSON, or the entries exceed the cap (`splat-prepare`: `MaxBundleBytes` + 576 MiB; `splat-finish`: 2 GiB).
-A failed run is reported with `fail`, never as a result.
+A recognition result is the same zip with `status.json` alone and the kind's document inline as `result`. A failed run is reported with `fail`, never as a result.
 
 ---
 

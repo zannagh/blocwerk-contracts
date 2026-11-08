@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/match-request.schema.json",
+  "title": "MatchRequest",
+  "description": "The 'request' part of a 'match-panels' job (runner protocol 1.2; parts 'left' and 'right', one image each): the arguments of IHoldOverlapMatcher.Match besides the images. Hold centres are fractions (0..1) of their photo.",
+  "type": "object",
+  "required": ["version", "leftHolds", "rightHolds"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "leftHolds": {"type": "array", "maxItems": 2000, "items": {"$ref": "#/$defs/hold"}},
+    "rightHolds": {"type": "array", "maxItems": 2000, "items": {"$ref": "#/$defs/hold"}},
+    "direction": {
+      "type": "string",
+      "enum": ["Right", "Left", "Up", "Down"],
+      "default": "Right",
+      "description": "Which edge of the left photo overlaps the right one; advisory."
+    },
+    "seed": {"$ref": "#/$defs/overlapSeed"}
+  },
+  "$defs": {
+    "hold": {
+      "type": "object",
+      "required": ["id", "x", "y"],
+      "properties": {
+        "id": {"type": "integer", "description": "Unique within its photo."},
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "sizeNorm": {"type": ["number", "null"]},
+        "color": {
+          "type": ["object", "null"],
+          "required": ["l", "a", "b"],
+          "properties": {"l": {"type": "number"}, "a": {"type": "number"}, "b": {"type": "number"}},
+          "description": "CIE Lab, OpenCV 8-bit (0..255 each).",
+          "additionalProperties": true
+        },
+        "shape": {
+          "type": ["array", "null"],
+          "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+          "description": "Custom outline as absolute normalized [x, y] vertices."
+        }
+      },
+      "additionalProperties": true
+    },
+    "overlapSeed": {
+      "type": "object",
+      "description": "HoldOverlapSeed: a marker- or geometry-derived prior (glyph walls). Photos are then read in their raw pixel frame.",
+      "required": ["source"],
+      "properties": {
+        "source": {"type": "string", "enum": ["SharedMarkers", "GeometryFacet"]},
+        "homography": {
+          "type": ["array", "null"],
+          "minItems": 9,
+          "maxItems": 9,
+          "items": {"type": "number"},
+          "description": "Row-major 3x3, left px to right px."
+        },
+        "markerCount": {"type": "integer", "minimum": 0},
+        "facetId": {"type": ["string", "null"]},
+        "fitRmsPx": {"type": ["number", "null"], "description": "Null where C# holds NaN."},
+        "measuredPairs": {
+          "type": "array",
+          "items": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}},
+          "description": "[leftX, leftY, rightX, rightY]"
+        },
+        "priorPairs": {
+          "type": "array",
+          "items": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}},
+          "description": "[leftX, leftY, rightX, rightY]"
+        },
+        "anchors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["leftHoldId", "rightHoldId", "planeDistanceMm", "similarity"],
+            "properties": {
+              "leftHoldId": {"type": "integer"},
+              "rightHoldId": {"type": "integer"},
+              "planeDistanceMm": {"type": "number"},
+              "similarity": {"type": "number"}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

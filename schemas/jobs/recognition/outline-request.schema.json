@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/outline-request.schema.json",
+  "title": "OutlineRequest",
+  "description": "The 'request' part of an 'outline-holds' job (runner protocol 1.2; part 'photo', one image). Seeds are HoldSeed: centre and radius as fractions of the photo (EXIF orientation applied), radius of the LONGER side.",
+  "type": "object",
+  "required": ["version", "seeds"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "seeds": {"type": "array", "maxItems": 2000, "items": {"$ref": "#/$defs/holdSeed"}},
+    "options": {
+      "type": "object",
+      "description": "Outliner options; unknown keys are ignored.",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "holdSeed": {
+      "type": "object",
+      "required": ["id", "x", "y", "radius"],
+      "properties": {
+        "id": {"type": "integer", "description": "Echoed in the result; unique within the job."},
+        "x": {"type": "number", "minimum": 0, "maximum": 1},
+        "y": {"type": "number", "minimum": 0, "maximum": 1},
+        "radius": {"type": "number", "exclusiveMinimum": 0},
+        "boxWidth": {
+          "type": ["number", "null"],
+          "description": "Detector box width as a fraction of the photo width; with boxHeight the box replaces the radius square."
+        },
+        "boxHeight": {"type": ["number", "null"]}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

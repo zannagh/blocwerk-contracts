@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/texture-match-result.schema.json",
+  "title": "TextureMatchResult",
+  "description": "The result of a 'texture-match' job (runner protocol 1.2): PhotoTextureMatch.",
+  "type": "object",
+  "required": ["version", "pairs", "coarseInliers"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "pairs": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/pair"},
+      "description": "Correspondences, photo px to texture px, both at full resolution."
+    },
+    "coarseInliers": {"type": "integer", "minimum": 0},
+    "failure": {"type": ["string", "null"], "description": "Why no pairs came back."}
+  },
+  "$defs": {
+    "pair": {
+      "type": "object",
+      "required": ["srcX", "srcY", "dstX", "dstY"],
+      "properties": {
+        "srcX": {"type": "number"},
+        "srcY": {"type": "number"},
+        "dstX": {"type": "number"},
+        "dstY": {"type": "number"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

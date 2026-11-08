@@ -93,8 +93,9 @@ public static partial class SchemaToCSharp
         return string.Join('.', new[] { RootNamespace }.Concat(folders.Select(Pascal)));
     }
 
+    /// <summary>Also splits at <c>@</c>, so the capability <c>detect-holds@2</c> becomes the constant <c>DetectHolds2</c>.</summary>
     internal static string Pascal(string name) =>
-        string.Concat(name.Split('-', '_').Where(p => p.Length > 0).Select(p => char.ToUpperInvariant(p[0]) + p[1..]));
+        string.Concat(name.Split('-', '_', '@').Where(p => p.Length > 0).Select(p => char.ToUpperInvariant(p[0]) + p[1..]));
 
     private static string FileStem(string relative) => Pascal(Path.GetFileName(relative).Replace(".schema.json", string.Empty, StringComparison.Ordinal));
 
