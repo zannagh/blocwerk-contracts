@@ -43,6 +43,12 @@ namespace Blocwerk.Contracts.Compute.Runner
         [System.Text.Json.Serialization.JsonPropertyName("pauseAware")]
         public bool? PauseAware { get; init; } = default!;
 
+        /// <summary>
+        /// Runner protocol 1.2: the capabilities from the hello that the server accepted (known names only). A server without this field (1.1 and older) confirms nothing; the instance runner then refuses to start.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("capabilities")]
+        public System.Collections.Generic.ICollection<string>? Capabilities { get; init; } = default!;
+
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]

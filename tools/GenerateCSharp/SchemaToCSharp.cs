@@ -46,7 +46,9 @@ public static partial class SchemaToCSharp
             var ns = Namespace(relative);
             var constants = EnumConstants.Strip(schema);
             ShapeRewrites.Apply(schema);
-            var code = Generate(schema, ns);
+            var (usings, excluded) = CrossFileTypes(schemasDir, Path.Combine(schemasDir, relative));
+            var code = Generate(schema, ns, excluded);
+            code = code.Replace("#nullable enable\n", "#nullable enable\n" + usings, StringComparison.Ordinal);
             Register(typesPerNamespace, ns, relative, TypeNames(code));
             var target = Path.Combine(outputDir, Path.GetDirectoryName(relative)!, FileStem(relative) + ".g.cs");
             Directory.CreateDirectory(Path.GetDirectoryName(target)!);
@@ -66,7 +68,32 @@ public static partial class SchemaToCSharp
         return await JsonSchema.FromJsonAsync(json, path);
     }
 
-    private static string Generate(JsonSchema schema, string ns)
+    /// <summary>
+    /// A schema that <c>$ref</c>s another file (recognition/detect-request reuses detect-holds/holds-job) reuses that
+    /// file's generated types instead of declaring a copy: returns the <c>using</c> lines and the type names to skip.
+    /// </summary>
+    private static (string Usings, string[] Excluded) CrossFileTypes(string schemasDir, string path)
+    {
+        var usings = new StringBuilder();
+        var excluded = new List<string>();
+        var refs = FileReference().Matches(File.ReadAllText(path)).Select(m => m.Groups[1].Value).Distinct();
+        foreach (var reference in refs)
+        {
+            var target = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path)!, reference));
+            using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(target));
+            var root = doc.RootElement;
+            usings.Append("using ").Append(Namespace(Path.GetRelativePath(schemasDir, target).Replace('\\', '/'))).Append(";\n");
+            excluded.Add(root.GetProperty("title").GetString()!);
+            if (root.TryGetProperty("$defs", out var defs))
+            {
+                excluded.AddRange(defs.EnumerateObject().Where(d => d.Value.TryGetProperty("properties", out _)).Select(d => Pascal(d.Name)));
+            }
+        }
+
+        return (usings.ToString(), excluded.ToArray());
+    }
+
+    private static string Generate(JsonSchema schema, string ns, string[] excluded)
     {
         var settings = new CSharpGeneratorSettings
         {
@@ -78,6 +105,7 @@ public static partial class SchemaToCSharp
             GenerateDataAnnotations = false,
             GenerateOptionalPropertiesAsNullable = true,
             GenerateDefaultValues = false,
+            ExcludedTypeNames = excluded,
         };
         var code = new CSharpGenerator(schema, settings).GenerateFile();
 
@@ -115,6 +143,9 @@ public static partial class SchemaToCSharp
             known[name] = relative;
         }
     }
+
+    [GeneratedRegex("\"\\$ref\": \"(\\.\\./[^\"#]+\\.schema\\.json)\"")]
+    private static partial Regex FileReference();
 
     [GeneratedRegex(@"public (?:partial )?(?:record|class|enum) (\w+)")]
     private static partial Regex TypeDeclaration();

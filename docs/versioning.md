@@ -47,7 +47,7 @@ There is no version number in `hello`. Compatibility is negotiated per feature:
 
 | question | how it is answered |
 |---|---|
-| May this runner get kind K? | its hello lists capability K (equal to the kind name). The server stores only names it knows; no list or no known name means `splat` only. So a new kind is invisible to old runners, and a new runner's unknown capability is dropped by an old server. |
+| May this runner get kind K? | its hello lists capability K (equal to the kind name). The server stores only names it knows; no list or no known name means `splat` only. So a new kind is invisible to old runners, and a new runner's unknown capability is dropped by an old server: a 1.2 instance runner talking to a 1.1 server is a `splat` runner. It therefore refuses to start unless the hello answer confirms a recognition capability (protocol.md §1.5), and ships with its own app version. |
 | Does it have the resources for this job? | per kind: `textures` → `requiredMemoryMb` ≤ hello `texturesMemoryMb`; `splat-prepare` / `splat-finish` and the 1.2 recognition kinds → `requiredMemoryMb` ≤ hello `memoryBudgetMb`; `splat` → job quality ≤ `min(hello.maxQuality, claim.maxQuality)` (the server lowers `maxQuality` to what trainer and VRAM support); bundle size ≤ claim `maxBundleBytes`. |
 | Does the server understand pausing? | the hello answer has `pauseAware: true`. Without it the runner does not send paused hellos. |
 | Does the server know `reason` on 410? | `reason` present. Without it a runner treats a `410` as `requeued` (keeps checkpoints). |

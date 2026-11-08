@@ -26,13 +26,13 @@ namespace Blocwerk.Contracts.Compute.Jobs.Recognition
         public int Id { get; init; } = default!;
 
         /// <summary>
-        /// Why there is no outline; when set, only id is present.
+        /// Why there is no outline; then only id is present. Exactly one of this and the outline fields (polygon, anchorX, anchorY, areaPx, bounds, confidence, method, fingerprint) is given.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("failure")]
         public string? Failure { get; init; } = default!;
 
         /// <summary>
-        /// Normalized image coordinates in contour order, at most 24 vertices.
+        /// NormalizedPoint list as [x, y] pairs (the runner converts from {X, Y}): normalized image coordinates in contour order, at most 24 vertices.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("polygon")]
         public System.Collections.Generic.ICollection<System.Collections.Generic.ICollection<double>>? Polygon { get; init; } = default!;
@@ -61,6 +61,9 @@ namespace Blocwerk.Contracts.Compute.Jobs.Recognition
         [System.Text.Json.Serialization.JsonPropertyName("confidence")]
         public double? Confidence { get; init; } = default!;
 
+        /// <summary>
+        /// HoldOutlineMethod, as its PascalCase name.
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("method")]
         public string? Method { get; init; } = default!;
 
@@ -193,7 +196,7 @@ namespace Blocwerk.Contracts.Compute.Jobs.Recognition
     }
 
     /// <summary>
-    /// The result of an 'outline-holds' job (runner protocol 1.2): one entry per seed, in seed order. Geometry only; the app plans and writes. Entries mirror HoldOutlineResult; coordinates are fractions of the photo.
+    /// The result of an 'outline-holds' job (runner protocol 1.2): one entry per seed, in seed order. Geometry only; the app plans and writes. Entries mirror HoldOutlineResult; coordinates are fractions of the photo. Points are [x, y] pairs; the runner converts them from NormalizedPoint.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.6.1.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record OutlineResult

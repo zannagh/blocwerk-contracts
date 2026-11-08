@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://blocwerk.app/contracts/jobs/recognition/markers-result.schema.json",
   "title": "MarkersResult",
-  "description": "The result of a 'markers' job (runner protocol 1.2): MarkerDetectionResult. Corners are [x, y] pairs in ArUco order TL, TR, BR, BL.",
+  "description": "The result of a 'markers' job (runner protocol 1.2): MarkerDetectionResult. Corners are [x, y] pairs in ArUco order TL, TR, BR, BL. Points are [x, y] pairs; the runner converts them from MarkerPoint ({X, Y}).",
   "type": "object",
-  "required": ["version", "imageWidth", "imageHeight", "markers"],
+  "required": ["version", "imageWidth", "imageHeight", "markers", "rejected"],
   "properties": {
     "version": {"type": "integer", "const": 1},
     "imageWidth": {"type": "integer", "minimum": 1},
@@ -14,7 +14,11 @@
       "items": {"$ref": "#/$defs/marker"},
       "description": "Validated markers, ordered by id; ids are unique."
     },
-    "rejected": {"type": "array", "items": {"$ref": "#/$defs/rejectedMarker"}},
+    "rejected": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/rejectedMarker"},
+      "description": "Decoded candidates that failed validation; empty when none."
+    },
     "undecodedCandidateCount": {"type": "integer", "minimum": 0},
     "suspicious": {"type": "boolean"},
     "warnings": {"type": "array", "items": {"type": "string"}}
@@ -59,7 +63,11 @@
         },
         "sidePx": {"type": "number"},
         "edgeRatio": {"type": "number"},
-        "reason": {"type": "string", "enum": ["IdNotAllowed", "TooSmall", "TooOblique", "DuplicateId", "NoQuietZone"]},
+        "reason": {
+          "type": "string",
+          "enum": ["IdNotAllowed", "TooSmall", "TooOblique", "DuplicateId", "NoQuietZone"],
+          "description": "MarkerRejectionReason, as its PascalCase name."
+        },
         "detail": {"type": "string"}
       },
       "additionalProperties": true

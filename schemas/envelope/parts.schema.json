@@ -174,28 +174,153 @@
     },
     {
       "if": {"properties": {"kind": {"const": "detect-holds@2"}}},
-      "then": {"properties": {"parts": {"items": {"properties": {"name": {"enum": ["photos", "request"]}}}}}}
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["photos", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "photos"}}, "required": ["name"]},
+                "maxContains": 8,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "if": {"properties": {"kind": {"const": "outline-holds"}}},
-      "then": {"properties": {"parts": {"items": {"properties": {"name": {"enum": ["photo", "request"]}}}}}}
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["photo", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "photo"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "if": {"properties": {"kind": {"const": "markers"}}},
-      "then": {"properties": {"parts": {"items": {"properties": {"name": {"enum": ["photo", "request"]}}}}}}
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["photo", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "photo"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "if": {"properties": {"kind": {"const": "match-panels"}}},
-      "then": {"properties": {"parts": {"items": {"properties": {"name": {"enum": ["left", "right", "request"]}}}}}}
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["left", "right", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "left"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "right"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "if": {"properties": {"kind": {"const": "presence"}}},
-      "then": {"properties": {"parts": {"items": {"properties": {"name": {"enum": ["old", "new", "request"]}}}}}}
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["old", "new", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "old"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "new"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "if": {"properties": {"kind": {"const": "texture-match"}}},
       "then": {
-        "properties": {"parts": {"items": {"properties": {"name": {"enum": ["photo", "texture", "mask", "request"]}}}}}
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["photo", "texture", "mask", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "photo"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "texture"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "mask"}}, "required": ["name"]},
+                "maxContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
       }
     }
   ]

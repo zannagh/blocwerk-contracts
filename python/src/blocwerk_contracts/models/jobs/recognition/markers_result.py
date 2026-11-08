@@ -57,12 +57,15 @@ class RejectedMarker(BaseModel):
     side_px: Annotated[float, Field(alias='sidePx')]
     edge_ratio: Annotated[float, Field(alias='edgeRatio')]
     reason: Literal['IdNotAllowed', 'TooSmall', 'TooOblique', 'DuplicateId', 'NoQuietZone']
+    """
+    MarkerRejectionReason, as its PascalCase name.
+    """
     detail: str | None = None
 
 
 class MarkersResult(BaseModel):
     """
-    The result of a 'markers' job (runner protocol 1.2): MarkerDetectionResult. Corners are [x, y] pairs in ArUco order TL, TR, BR, BL.
+    The result of a 'markers' job (runner protocol 1.2): MarkerDetectionResult. Corners are [x, y] pairs in ArUco order TL, TR, BR, BL. Points are [x, y] pairs; the runner converts them from MarkerPoint ({X, Y}).
     """
 
     model_config = ConfigDict(
@@ -76,7 +79,10 @@ class MarkersResult(BaseModel):
     """
     Validated markers, ordered by id; ids are unique.
     """
-    rejected: list[RejectedMarker] | None = None
+    rejected: list[RejectedMarker]
+    """
+    Decoded candidates that failed validation; empty when none.
+    """
     undecoded_candidate_count: Annotated[
         int | None, Field(alias='undecodedCandidateCount', ge=0)
     ] = None

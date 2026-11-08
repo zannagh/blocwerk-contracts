@@ -76,6 +76,9 @@ namespace Blocwerk.Contracts.Compute.Jobs.Recognition
         [System.Text.Json.Serialization.JsonPropertyName("edgeRatio")]
         public double EdgeRatio { get; init; } = default!;
 
+        /// <summary>
+        /// MarkerRejectionReason, as its PascalCase name.
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("reason")]
         public string Reason { get; init; } = default!;
 
@@ -94,7 +97,7 @@ namespace Blocwerk.Contracts.Compute.Jobs.Recognition
     }
 
     /// <summary>
-    /// The result of a 'markers' job (runner protocol 1.2): MarkerDetectionResult. Corners are [x, y] pairs in ArUco order TL, TR, BR, BL.
+    /// The result of a 'markers' job (runner protocol 1.2): MarkerDetectionResult. Corners are [x, y] pairs in ArUco order TL, TR, BR, BL. Points are [x, y] pairs; the runner converts them from MarkerPoint ({X, Y}).
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.6.1.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record MarkersResult
@@ -115,8 +118,11 @@ namespace Blocwerk.Contracts.Compute.Jobs.Recognition
         [System.Text.Json.Serialization.JsonPropertyName("markers")]
         public System.Collections.Generic.ICollection<Marker> Markers { get; init; } = new System.Collections.ObjectModel.Collection<Marker>();
 
+        /// <summary>
+        /// Decoded candidates that failed validation; empty when none.
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("rejected")]
-        public System.Collections.Generic.ICollection<RejectedMarker>? Rejected { get; init; } = default!;
+        public System.Collections.Generic.ICollection<RejectedMarker> Rejected { get; init; } = new System.Collections.ObjectModel.Collection<RejectedMarker>();
 
         [System.Text.Json.Serialization.JsonPropertyName("undecodedCandidateCount")]
         public int? UndecodedCandidateCount { get; init; } = default!;

@@ -9,6 +9,7 @@
 
 
 #nullable enable
+using Blocwerk.Contracts.Compute.Jobs.DetectHolds;
 
 
 namespace Blocwerk.Contracts.Compute.Jobs.Recognition
@@ -43,42 +44,6 @@ namespace Blocwerk.Contracts.Compute.Jobs.Recognition
     }
 
     /// <summary>
-    /// holds-job.json of a 'detect-holds' bundle (RunnerHoldsBundle). The bundle also holds model.onnx (the app's detector) and photos/&lt;camera image&gt;.jpg|png. The runner replays the app's tiled detection box for box.
-    /// </summary>
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.6.1.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial record HoldsJob
-    {
-
-        [System.Text.Json.Serialization.JsonPropertyName("version")]
-        public int Version { get; init; } = default!;
-
-        [System.Text.Json.Serialization.JsonPropertyName("tiling")]
-        public Tiling Tiling { get; init; } = new Tiling();
-
-        /// <summary>
-        /// Confidence when tiling is off (0.25).
-        /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("wholeImageConfidence")]
-        public double WholeImageConfidence { get; init; } = default!;
-
-        /// <summary>
-        /// IoU of the per-window NMS (0.45).
-        /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("windowIoU")]
-        public double WindowIoU { get; init; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [System.Text.Json.Serialization.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    /// <summary>
     /// The 'request' part of a 'detect-holds@2' job (runner protocol 1.2): jobs/detect-holds/holds-job plus the model, which is fetched by hash (GET /api/runners/models/{sha256}) instead of travelling in the bundle. The result is jobs/detect-holds/holds-result, unchanged: camera image name = the photo part's file name.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.6.1.0 (Newtonsoft.Json v13.0.0.0)")]
@@ -87,39 +52,6 @@ namespace Blocwerk.Contracts.Compute.Jobs.Recognition
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
         public Model Model { get; init; } = new Model();
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.6.1.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial record Tiling
-    {
-
-        [System.Text.Json.Serialization.JsonPropertyName("enabled")]
-        public bool Enabled { get; init; } = default!;
-
-        [System.Text.Json.Serialization.JsonPropertyName("tileSize")]
-        public int TileSize { get; init; } = default!;
-
-        [System.Text.Json.Serialization.JsonPropertyName("overlap")]
-        public int Overlap { get; init; } = default!;
-
-        [System.Text.Json.Serialization.JsonPropertyName("confidence")]
-        public double Confidence { get; init; } = default!;
-
-        /// <summary>
-        /// Only 'nearest' is sent while tiling is on (other settings are detected in the app).
-        /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sampling")]
-        public string Sampling { get; init; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [System.Text.Json.Serialization.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
 
     }
 }

@@ -53,7 +53,7 @@ hello ──► claim (long-poll ~25 s) ──204──► claim …
 
 1. **`POST /api/runners/hello`** ([`runner/hello`](../schemas/runner/hello.schema.json)): hardware, trainer, highest
    quality, memory budget, `capabilities`, `paused`. At start, after reconnecting, and every 30 s while paused. The
-   answer ([`runner/hello-response`](../schemas/runner/hello-response.schema.json)) has `runnerId`, `name`,
+   answer ([`runner/hello-response`](../schemas/runner/hello-response.schema.json)) has `runnerId`, `name`, `capabilities` (1.2: the accepted names),
    `pollSeconds` and `pauseAware`.
 2. **`POST /api/runners/claim`** (optional body [`runner/claim-request`](../schemas/runner/claim-request.schema.json):
    `maxQuality`, `maxBundleBytes`): `200` with a [`runner/claim`](../schemas/runner/claim.schema.json), or `204` after
@@ -172,6 +172,12 @@ its hash. Everything else is the ordinary protocol: hello, claim, the same refus
 token (so more replicas can share the key). External runners (a home PC, a Mac) keep `bwr_` keys and the per-wall rules,
 and may advertise the recognition capabilities next to their 3D ones; when one is online it soaks up background work.
 
+**Against a 1.1 server.** A server from before 1.2 drops the recognition capability names (no known name means `splat`
+only, [`versioning.md`](versioning.md)) and its hello answer has no `capabilities` field. The instance runner therefore
+**refuses to start** unless the hello answer's `capabilities` (1.2, the names the server accepted) lists a recognition
+kind (exit non-zero, no claims), instead of polling as a `splat` runner that never gets work. It is deployed with its own app version: the chart ships the pod and
+the app from the same release, so a 1.2 pod never meets a 1.1 app in a normal deployment.
+
 **`splat`.** The training bundle is the splat worker's `splat-prepare` `bundle.zip`, rebuilt by the server
 (`RunnerBundle`): at most 20000 entries, 8 GiB uncompressed, 256 MiB per entry. The server accepts any subset of the
 known `train.json` keys; the runner needs all of them (the schema is what both accept). A runner applies `zones.json`
@@ -218,6 +224,7 @@ The multipart request the HTTP worker would have received, as one zip
 - Part names: `splat-prepare` takes `photos` (photos, `vf_…` video frames and `a00…` anchor photos all travel as
   `photos`), `geometry`, `options`; `splat-finish` takes `prepared` (json), `splat` (`splat.ply` or `splat.spz`),
   `trainStats` (json). A runner refuses any other part name.
+  The schema also fixes how often each part occurs (`photos` 1..8, `mask` 0..1, every other listed part exactly once).
   Recognition kinds (`service: "recognition"`, 1.2) take `request` (json, the kind's request document) and image files:
 
   | kind | file parts |

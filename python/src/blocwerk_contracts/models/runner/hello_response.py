@@ -30,3 +30,7 @@ class RunnerHelloResponse(BaseModel):
     """
     The server understands hello's 'paused' and fail's 'pause'. Absent on servers from before the pause switch: a runner must then stop sending paused hellos (it shows offline there).
     """
+    capabilities: list[str] | None = None
+    """
+    Runner protocol 1.2: the capabilities from the hello that the server accepted (known names only). A server without this field (1.1 and older) confirms nothing; the instance runner then refuses to start.
+    """

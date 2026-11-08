@@ -57,7 +57,7 @@ class Fingerprint(BaseModel):
     area_mm2: Annotated[float | None, Field(alias='areaMm2')] = None
 
 
-class Outline(BaseModel):
+class Outline1(BaseModel):
     model_config = ConfigDict(
         extra='allow',
         populate_by_name=True,
@@ -66,13 +66,13 @@ class Outline(BaseModel):
     """
     The seed's id.
     """
-    failure: str | None = None
+    failure: str
     """
-    Why there is no outline; when set, only id is present.
+    Why there is no outline; then only id is present. Exactly one of this and the outline fields (polygon, anchorX, anchorY, areaPx, bounds, confidence, method, fingerprint) is given.
     """
     polygon: Annotated[list[PolygonItem] | None, Field(max_length=24)] = None
     """
-    Normalized image coordinates in contour order, at most 24 vertices.
+    NormalizedPoint list as [x, y] pairs (the runner converts from {X, Y}): normalized image coordinates in contour order, at most 24 vertices.
     """
     anchor_x: Annotated[float | None, Field(alias='anchorX')] = None
     anchor_y: Annotated[float | None, Field(alias='anchorY')] = None
@@ -89,7 +89,49 @@ class Outline(BaseModel):
     method: Literal['Contour', 'GrabCut', 'CircleFallback', 'Segmenter', 'RoughShape'] | None = (
         None
     )
+    """
+    HoldOutlineMethod, as its PascalCase name.
+    """
     fingerprint: Fingerprint | None = None
+    corroborated: bool | None = None
+    distinct: bool | None = None
+    pale: bool | None = None
+
+
+class Outline2(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+        populate_by_name=True,
+    )
+    id: int
+    """
+    The seed's id.
+    """
+    failure: str | None = None
+    """
+    Why there is no outline; then only id is present. Exactly one of this and the outline fields (polygon, anchorX, anchorY, areaPx, bounds, confidence, method, fingerprint) is given.
+    """
+    polygon: Annotated[list[PolygonItem], Field(max_length=24)]
+    """
+    NormalizedPoint list as [x, y] pairs (the runner converts from {X, Y}): normalized image coordinates in contour order, at most 24 vertices.
+    """
+    anchor_x: Annotated[float, Field(alias='anchorX')]
+    anchor_y: Annotated[float, Field(alias='anchorY')]
+    shape_points: Annotated[list[ShapePoint] | None, Field(alias='shapePoints')] = None
+    """
+    The polygon relative to the anchor (Hold.ShapePoints convention); null for a circle fallback.
+    """
+    shape_holes: Annotated[list[list[ShapePoint]] | None, Field(alias='shapeHoles')] = (
+        None
+    )
+    area_px: Annotated[float, Field(alias='areaPx')]
+    bounds: Bounds
+    confidence: Annotated[float, Field(ge=0.0, le=1.0)]
+    method: Literal['Contour', 'GrabCut', 'CircleFallback', 'Segmenter', 'RoughShape']
+    """
+    HoldOutlineMethod, as its PascalCase name.
+    """
+    fingerprint: Fingerprint
     corroborated: bool | None = None
     distinct: bool | None = None
     pale: bool | None = None
@@ -97,7 +139,7 @@ class Outline(BaseModel):
 
 class OutlineResult(BaseModel):
     """
-    The result of an 'outline-holds' job (runner protocol 1.2): one entry per seed, in seed order. Geometry only; the app plans and writes. Entries mirror HoldOutlineResult; coordinates are fractions of the photo.
+    The result of an 'outline-holds' job (runner protocol 1.2): one entry per seed, in seed order. Geometry only; the app plans and writes. Entries mirror HoldOutlineResult; coordinates are fractions of the photo. Points are [x, y] pairs; the runner converts them from NormalizedPoint.
     """
 
     model_config = ConfigDict(
@@ -105,4 +147,4 @@ class OutlineResult(BaseModel):
         populate_by_name=True,
     )
     version: Literal[1]
-    outlines: list[Outline]
+    outlines: list[Outline1 | Outline2]
