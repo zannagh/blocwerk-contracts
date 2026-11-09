@@ -68,3 +68,7 @@ class RunnerClaim(BaseModel):
     """
     Memory the job needs on the runner, MB: textures (against texturesMemoryMb), splat-prepare / splat-finish (against memoryBudgetMb; 6144 / 3072 by default) and the recognition kinds (against memoryBudgetMb; estimated from the photos' pixel counts). Null when the kind has no memory gate.
     """
+    run_seconds: Annotated[int | None, Field(alias='runSeconds', ge=1)] = None
+    """
+    The run budget for this job in seconds; the runner settles and fails the job when it is exceeded; older servers omit it and runners fall back to their own budget.
+    """

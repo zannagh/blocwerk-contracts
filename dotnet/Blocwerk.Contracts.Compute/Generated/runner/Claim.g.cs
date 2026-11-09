@@ -79,6 +79,12 @@ namespace Blocwerk.Contracts.Compute.Runner
         [System.Text.Json.Serialization.JsonPropertyName("requiredMemoryMb")]
         public int? RequiredMemoryMb { get; init; } = default!;
 
+        /// <summary>
+        /// The run budget for this job in seconds; the runner settles and fails the job when it is exceeded; older servers omit it and runners fall back to their own budget.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("runSeconds")]
+        public int? RunSeconds { get; init; } = default!;
+
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]

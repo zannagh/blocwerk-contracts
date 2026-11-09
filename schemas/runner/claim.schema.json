@@ -71,6 +71,14 @@
         "null"
       ],
       "description": "Memory the job needs on the runner, MB: textures (against texturesMemoryMb), splat-prepare / splat-finish (against memoryBudgetMb; 6144 / 3072 by default) and the recognition kinds (against memoryBudgetMb; estimated from the photos' pixel counts). Null when the kind has no memory gate."
+    },
+    "runSeconds": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "description": "The run budget for this job in seconds; the runner settles and fails the job when it is exceeded; older servers omit it and runners fall back to their own budget."
     }
   },
   "if": {

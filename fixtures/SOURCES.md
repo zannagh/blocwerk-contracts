@@ -17,6 +17,8 @@ runner) or a test literal, where running the producer needs a GPU, a database or
 | `runner/claim-request/valid/python-runner.json` | derived | `gpurunner/client.py` `claim()` |
 | `runner/claim/valid/*` | derived | `GpuJobQueue.ClaimAsync` → `RunnerClaim` per kind; `server-before-kinds` = the 1.0 shape `fake_server.py` sends |
 | `runner/claim/invalid/fake-server-job-id.json` | captured | `tests/fake_server.py` `FakeServer.job()` (non-GUID ids, see `docs/code-vs-docs.md` #16) |
+| `runner/claim/valid/run-seconds.json` | derived | `GpuJobQueue.ClaimAsync` → `RunnerClaim.RunSeconds` (runner protocol 1.2); written from the run-budget defaults in `docs/protocol.md` §1.4 |
+| `runner/claim/invalid/run-seconds-zero.json` | derived | as `run-seconds`, with the budget below the schema minimum of 1 |
 | `runner/progress/valid/heartbeat-initial.json` | derived | `gpurunner/heartbeat.py` initial state |
 | `runner/failure/valid/*` | derived | `gpurunner/client.py` `fail()` for pause, SIGTERM, unreachable, fatal |
 | `runner/problem/valid/*` | derived | `RunnerApiEndpoints.Gone` / `TooManyRequests` (ASP.NET problem details) |

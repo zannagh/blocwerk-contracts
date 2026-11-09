@@ -15,7 +15,7 @@ The runner protocol history:
 |---|---|---|
 | 1.0 | hello / claim / bundle / progress / result / preview / fail; kinds `splat`, `textures`, `detect-holds`, `register-panels`; pause | `main` |
 | 1.1 | kinds `splat-prepare`, `splat-finish`; the runner envelope; per-kind result caps | `staging-o7` (PRs #239, #240) |
-| 1.2 | recognition kinds `detect-holds@2`, `outline-holds`, `markers`, `match-panels`, `presence`, `texture-match` (envelope `service: "recognition"`); `GET /api/runners/models/{sha256}`; the instance runner; `leaseSeconds` per lane; API mapped whenever recognition is on (repository `v0.2.0`) | recognition queue, PRs R2–R6 |
+| 1.2 | recognition kinds `detect-holds@2`, `outline-holds`, `markers`, `match-panels`, `presence`, `texture-match` (envelope `service: "recognition"`); `GET /api/runners/models/{sha256}`; the instance runner; `leaseSeconds` per lane and the optional claim field `runSeconds` (the run budget); API mapped whenever recognition is on (repository `v0.2.0`) | recognition queue, PRs R2–R6 |
 
 ## Rules
 

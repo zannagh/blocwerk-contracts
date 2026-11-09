@@ -160,8 +160,10 @@ orientation, like hold positions.
 before background, then oldest first. The lane shows only in the claim's `leaseSeconds`: 30 (heartbeat every 5 s)
 interactive, 120 (heartbeat every 30 s) background, 300 for the other kinds. A runner uses what the claim says. An
 interactive job nobody claims within 20 s is cancelled by the app; a background job stays queued. After the claim,
-`detect-holds@2` may run 90 s per photo and the other interactive kinds 60 s; a background job 30 min. Attempts: 2
-interactive, 3 background.
+the claim's optional `runSeconds` (additive, integer >= 1) is the run budget: the runner settles and fails the job when it
+is exceeded; an older server omits it and the runner falls back to its own budget. The server defaults: `outline-holds`
+60 s + 0.5 s per seed, capped at 15 min; `detect-holds@2` 90 s per photo; the other recognition kinds 60 s + 3 s per
+megapixel, capped at 5 min; the background lane 30 min. Attempts: 2 interactive, 3 background.
 
 ### 1.5 Instance runner
 
