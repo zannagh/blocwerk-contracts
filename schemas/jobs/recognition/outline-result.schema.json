@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/outline-result.schema.json",
+  "title": "OutlineResult",
+  "description": "The result of an 'outline-holds' job (runner protocol 1.2): one entry per seed, in seed order. Geometry only; the app plans and writes. Entries mirror HoldOutlineResult; coordinates are fractions of the photo. Points are [x, y] pairs; the runner converts them from NormalizedPoint.",
+  "type": "object",
+  "required": ["version", "outlines"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "outlines": {"type": "array", "items": {"$ref": "#/$defs/outline"}}
+  },
+  "$defs": {
+    "outline": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "integer", "description": "The seed's id."},
+        "failure": {
+          "type": "string",
+          "description": "Why there is no outline; then only id is present. Exactly one of this and the outline fields (polygon, anchorX, anchorY, areaPx, bounds, confidence, method, fingerprint) is given."
+        },
+        "polygon": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"type": "number"},
+            "description": "[x, y]"
+          },
+          "description": "NormalizedPoint list as [x, y] pairs (the runner converts from {X, Y}): normalized image coordinates in contour order, at most 24 vertices."
+        },
+        "anchorX": {"type": "number"},
+        "anchorY": {"type": "number"},
+        "shapePoints": {
+          "type": ["array", "null"],
+          "items": {"$ref": "#/$defs/shapePoint"},
+          "description": "The polygon relative to the anchor (Hold.ShapePoints convention); null for a circle fallback."
+        },
+        "shapeHoles": {"type": ["array", "null"], "items": {"type": "array", "items": {"$ref": "#/$defs/shapePoint"}}},
+        "areaPx": {"type": "number"},
+        "bounds": {"$ref": "#/$defs/bounds"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "method": {
+          "type": "string",
+          "enum": ["Contour", "GrabCut", "CircleFallback", "Segmenter", "RoughShape"],
+          "description": "HoldOutlineMethod, as its PascalCase name."
+        },
+        "fingerprint": {"$ref": "#/$defs/fingerprint"},
+        "corroborated": {"type": "boolean"},
+        "distinct": {"type": "boolean"},
+        "pale": {"type": "boolean"}
+      },
+      "additionalProperties": true,
+      "oneOf": [
+        {"required": ["failure"]},
+        {
+          "required": ["polygon", "anchorX", "anchorY", "areaPx", "bounds", "confidence", "method", "fingerprint"]
+        }
+      ]
+    },
+    "shapePoint": {
+      "type": "object",
+      "required": ["dx", "dy"],
+      "properties": {"dx": {"type": "number"}, "dy": {"type": "number"}},
+      "additionalProperties": true
+    },
+    "bounds": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "width": {"type": "number"},
+        "height": {"type": "number"}
+      },
+      "additionalProperties": true
+    },
+    "fingerprint": {
+      "type": "object",
+      "required": ["version", "l", "a", "b", "histogram", "areaPx", "aspect", "orientationDeg", "solidity", "hu"],
+      "properties": {
+        "version": {"type": "integer"},
+        "l": {"type": "number"},
+        "a": {"type": "number"},
+        "b": {"type": "number"},
+        "histogram": {
+          "type": "array",
+          "minItems": 13,
+          "maxItems": 13,
+          "items": {"type": "number"},
+          "description": "12 hue bins plus one."
+        },
+        "areaPx": {"type": "number"},
+        "aspect": {"type": "number"},
+        "orientationDeg": {"type": "number"},
+        "solidity": {"type": "number"},
+        "hu": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "number"}},
+        "widthMm": {"type": ["number", "null"]},
+        "heightMm": {"type": ["number", "null"]},
+        "areaMm2": {"type": ["number", "null"]}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

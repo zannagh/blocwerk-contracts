@@ -1,0 +1,7 @@
+{
+  "runnerVersion": "recognition-0.1.0",
+  "platform": "Linux x86_64",
+  "memoryBudgetMb": 1536,
+  "paused": false,
+  "capabilities": ["detect-holds@2", "outline-holds", "markers", "match-panels", "presence", "texture-match"]
+}

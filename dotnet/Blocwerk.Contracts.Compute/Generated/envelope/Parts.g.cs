@@ -46,7 +46,7 @@ namespace Blocwerk.Contracts.Compute.Envelope
     }
 
     /// <summary>
-    /// Added in runner protocol 1.1 (blocwerk staging-o7, PRs #239/#240; not on main yet): parts.json, the first entry of a runner envelope: the bundle of a 'splat-prepare' / 'splat-finish' job. It is the multipart request the HTTP worker would have received; each part is a file (a stored zip entry of that name) or an inline JSON field. A runner refuses a part name its kind does not take.
+    /// Added in runner protocol 1.1 (blocwerk staging-o7, PRs #239/#240; not on main yet): parts.json, the first entry of a runner envelope: the bundle of a 'splat-prepare' / 'splat-finish' job and, from runner protocol 1.2, of the recognition kinds (service 'recognition'). It is the multipart request the HTTP worker would have received; each part is a file (a stored zip entry of that name) or an inline JSON field. A runner refuses a part name its kind does not take.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.6.1.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial record EnvelopeParts : object

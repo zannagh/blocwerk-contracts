@@ -17,6 +17,8 @@ runner) or a test literal, where running the producer needs a GPU, a database or
 | `runner/claim-request/valid/python-runner.json` | derived | `gpurunner/client.py` `claim()` |
 | `runner/claim/valid/*` | derived | `GpuJobQueue.ClaimAsync` → `RunnerClaim` per kind; `server-before-kinds` = the 1.0 shape `fake_server.py` sends |
 | `runner/claim/invalid/fake-server-job-id.json` | captured | `tests/fake_server.py` `FakeServer.job()` (non-GUID ids, see `docs/code-vs-docs.md` #16) |
+| `runner/claim/valid/run-seconds.json` | derived | `GpuJobQueue.ClaimAsync` → `RunnerClaim.RunSeconds` (runner protocol 1.2); written from the run-budget defaults in `docs/protocol.md` §1.4 |
+| `runner/claim/invalid/run-seconds-zero.json` | derived | as `run-seconds`, with the budget below the schema minimum of 1 |
 | `runner/progress/valid/heartbeat-initial.json` | derived | `gpurunner/heartbeat.py` initial state |
 | `runner/failure/valid/*` | derived | `gpurunner/client.py` `fail()` for pause, SIGTERM, unreachable, fatal |
 | `runner/problem/valid/*` | derived | `RunnerApiEndpoints.Gone` / `TooManyRequests` (ASP.NET problem details) |
@@ -27,6 +29,7 @@ runner) or a test literal, where running the producer needs a GPU, a database or
 | `jobs/textures/textures-manifest/valid/wall-geometry-synthetic.json` | captured | wall-geometry `POST /v1/jobs/textures` on its test scene (`tests/synthetic.py`), the `textures.json` file |
 | `jobs/detect-holds/holds-job/valid/app-defaults.json` | derived | `RunnerHoldsBundle.JobDocument` with the app's default tiling |
 | `jobs/detect-holds/holds-result/valid/two-photos.json` | derived | the shape `gpurunner/holds_detect.py` uploads and `RunnerHoldsResult` reads |
+| `jobs/recognition/*`, `envelope/parts/*/recognition-*.json`, `runner/claim/valid/recognition-interactive.json`, `runner/hello/valid/instance-runner-recognition.json`, `runner/hello-response/valid/recognition-server.json`, `worker/job-status/valid/recognition-presence-succeeded.json`, `layouts/envelope-result/valid/recognition-status-only.json` | derived | written from the C# types they mirror (`HoldSeed`, `HoldOutlineResult`, `MarkerDetectionOptions` / `MarkerDetectionResult`, `IHoldOverlapMatcher.Match` / `HoldOverlapResult`, `PresenceQuery`, `IPhotoTextureSession.Match` / `PhotoTextureMatch`; blocwerk `src/Blocwerk.Core/Abstractions`) and the recognition queue design; no producer exists yet (runner protocol 1.2) |
 | `jobs/register-panels/register-job/valid/attic-cameras.json` | derived | `RunnerPanelsBundle.JobDocument` over three real solved cameras of The Attic |
 | `jobs/register-panels/panels-result/valid/from-csharp-test.json` | derived | the literal in `test/Blocwerk.Core.Tests/RunnerPanelPosesTests.cs` |
 | `worker/health/valid/*`, `worker/info/valid/*`, `worker/job-accepted/valid/*`, `worker/error/valid/*` | captured | wall-geometry and splat-worker through FastAPI's `TestClient` |

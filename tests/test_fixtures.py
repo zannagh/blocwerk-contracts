@@ -2,12 +2,17 @@
 import pytest
 from conftest import FIXTURES, fixtures, load, schema_key, schema_paths
 from jsonschema import Draft202012Validator, FormatChecker
+from referencing import Registry, Resource
 
 SCHEMAS = {schema_key(p): p for p in schema_paths()}
+# A few schemas $ref another file (jobs/recognition/detect-request reuses detect-holds/holds-job): resolve by $id.
+REGISTRY = Registry().with_resources(
+    (load(p)["$id"], Resource.from_contents(load(p))) for p in SCHEMAS.values()
+)
 
 
 def validator(key):
-    return Draft202012Validator(load(SCHEMAS[key]), format_checker=FormatChecker())
+    return Draft202012Validator(load(SCHEMAS[key]), format_checker=FormatChecker(), registry=REGISTRY)
 
 
 @pytest.mark.parametrize("key", sorted(SCHEMAS))

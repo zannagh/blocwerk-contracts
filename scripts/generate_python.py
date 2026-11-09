@@ -1,9 +1,11 @@
 """Generates the pydantic v2 models (python/src/blocwerk_contracts/models) from schemas/ with datamodel-code-generator.
 
 The schemas are copied to a temporary tree with importable names first (runner/hello-response.schema.json ->
-runner/hello_response.json, jobs/detect-holds -> jobs/detect_holds). They have no cross-file $refs, so renaming is safe.
+runner/hello_response.json, jobs/detect-holds -> jobs/detect_holds); the few relative $refs between files are renamed
+the same way.
 Zip layouts (schemas/layouts) describe entry listings, not payloads, and get no models.
 """
+import re
 import shutil
 import subprocess
 import sys
@@ -23,6 +25,14 @@ def module_path(relative):
     return Path(*parts)
 
 
+def rename_refs(text):
+    """"$ref": "../detect-holds/holds-job.schema.json" -> "../detect_holds/holds_job.json"."""
+    def rename(match):
+        return '"$ref": "' + module_path(Path(match.group(1))).as_posix() + (match.group(2) or "") + '"'
+
+    return re.sub(r'"\$ref": "([^"#]+\.schema\.json)(#[^"]*)?"', rename, text)
+
+
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         staged = Path(tmp) / "schemas"
@@ -32,7 +42,7 @@ def main():
                 continue
             target = staged / module_path(relative)
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(schema, target)
+            target.write_text(rename_refs(schema.read_text(encoding="utf-8")), encoding="utf-8")
         out = Path(tmp) / "models"
         subprocess.run([
             sys.executable, "-m", "datamodel_code_generator",

@@ -24,7 +24,7 @@ class RunnerClaim(BaseModel):
     """
     lease_seconds: Annotated[int, Field(alias='leaseSeconds', ge=1)]
     """
-    The lease; every progress call renews it.
+    The lease; every progress call renews it. Varies per lane: 30 s for the interactive lane (heartbeat every 5 s), 120 s for the background lane (30 s), 300 s for the other kinds.
     """
     bundle_bytes: Annotated[int, Field(alias='bundleBytes', ge=0)]
     """
@@ -52,6 +52,12 @@ class RunnerClaim(BaseModel):
             'register-panels',
             'splat-prepare',
             'splat-finish',
+            'detect-holds@2',
+            'outline-holds',
+            'markers',
+            'match-panels',
+            'presence',
+            'texture-match',
         ]
         | None
     ) = 'splat'
@@ -60,5 +66,9 @@ class RunnerClaim(BaseModel):
     """
     required_memory_mb: Annotated[int | None, Field(alias='requiredMemoryMb')] = None
     """
-    Memory the job needs on the runner, MB: textures (against texturesMemoryMb), splat-prepare / splat-finish (against memoryBudgetMb; 6144 / 3072 by default). Null when the kind has no memory gate.
+    Memory the job needs on the runner, MB: textures (against texturesMemoryMb), splat-prepare / splat-finish (against memoryBudgetMb; 6144 / 3072 by default) and the recognition kinds (against memoryBudgetMb; estimated from the photos' pixel counts). Null when the kind has no memory gate.
+    """
+    run_seconds: Annotated[int | None, Field(alias='runSeconds', ge=1)] = None
+    """
+    The run budget for this job in seconds; the runner settles and fails the job when it is exceeded; older servers omit it and runners fall back to their own budget.
     """

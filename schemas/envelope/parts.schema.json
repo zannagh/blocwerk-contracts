@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://blocwerk.app/contracts/envelope/parts.schema.json",
   "title": "EnvelopeParts",
-  "description": "Added in runner protocol 1.1 (blocwerk staging-o7, PRs #239/#240; not on main yet): parts.json, the first entry of a runner envelope: the bundle of a 'splat-prepare' / 'splat-finish' job. It is the multipart request the HTTP worker would have received; each part is a file (a stored zip entry of that name) or an inline JSON field. A runner refuses a part name its kind does not take.",
+  "description": "Added in runner protocol 1.1 (blocwerk staging-o7, PRs #239/#240; not on main yet): parts.json, the first entry of a runner envelope: the bundle of a 'splat-prepare' / 'splat-finish' job and, from runner protocol 1.2, of the recognition kinds (service 'recognition'). It is the multipart request the HTTP worker would have received; each part is a file (a stored zip entry of that name) or an inline JSON field. A runner refuses a part name its kind does not take.",
   "type": "object",
   "required": [
     "version",
@@ -17,13 +17,22 @@
     },
     "service": {
       "type": "string",
-      "const": "splat"
+      "enum": [
+        "splat",
+        "recognition"
+      ]
     },
     "kind": {
       "type": "string",
       "enum": [
         "splat-prepare",
-        "splat-finish"
+        "splat-finish",
+        "detect-holds@2",
+        "outline-holds",
+        "markers",
+        "match-panels",
+        "presence",
+        "texture-match"
       ]
     },
     "parts": {
@@ -98,6 +107,20 @@
   "additionalProperties": true,
   "allOf": [
     {
+      "if": {"properties": {"service": {"const": "splat"}}},
+      "then": {"properties": {"kind": {"enum": ["splat-prepare", "splat-finish"]}}}
+    },
+    {
+      "if": {"properties": {"service": {"const": "recognition"}}},
+      "then": {
+        "properties": {
+          "kind": {
+            "enum": ["detect-holds@2", "outline-holds", "markers", "match-panels", "presence", "texture-match"]
+          }
+        }
+      }
+    },
+    {
       "if": {
         "properties": {
           "kind": {
@@ -145,6 +168,157 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"kind": {"const": "detect-holds@2"}}},
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["photos", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "photos"}}, "required": ["name"]},
+                "maxContains": 8,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"kind": {"const": "outline-holds"}}},
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["photo", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "photo"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"kind": {"const": "markers"}}},
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["photo", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "photo"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"kind": {"const": "match-panels"}}},
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["left", "right", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "left"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "right"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"kind": {"const": "presence"}}},
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["old", "new", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "old"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "new"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"kind": {"const": "texture-match"}}},
+      "then": {
+        "properties": {
+          "parts": {
+            "items": {"properties": {"name": {"enum": ["photo", "texture", "mask", "request"]}}},
+            "allOf": [
+              {
+                "contains": {"properties": {"name": {"const": "photo"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "texture"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "mask"}}, "required": ["name"]},
+                "maxContains": 1
+              },
+              {
+                "contains": {"properties": {"name": {"const": "request"}}, "required": ["name"]},
+                "maxContains": 1,
+                "minContains": 1
+              }
+            ]
           }
         }
       }

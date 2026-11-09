@@ -12,7 +12,7 @@ the app depend on a pinned version of it, so they can be released independently.
 | [`docs/protocol.md`](docs/protocol.md) | the protocol: runner API, job kinds, runner envelope, compute job API |
 | [`docs/versioning.md`](docs/versioning.md) | semver, N/N-1 support, capability negotiation, how a breaking change rolls out |
 | [`docs/code-vs-docs.md`](docs/code-vs-docs.md) | where blocwerk's code and its older docs disagree (follow-ups) |
-| [`openapi/runner-api.yaml`](openapi/runner-api.yaml) | `/api/runners/*` (runner protocol 1.1), OpenAPI 3.1 |
+| [`openapi/runner-api.yaml`](openapi/runner-api.yaml) | `/api/runners/*` (runner protocol 1.2), OpenAPI 3.1 |
 | [`openapi/compute-job-api.yaml`](openapi/compute-job-api.yaml) | the workers' `/health`, `/v1/info`, `/v1/jobs` (`blocwerk-compute/1`) |
 | [`schemas/`](schemas) | JSON Schema 2020-12: `runner/`, `jobs/<kind>/`, `envelope/`, `worker/`, and zip `layouts/` |
 | [`fixtures/`](fixtures) | `valid/` and `invalid/` examples per schema; provenance in [`fixtures/SOURCES.md`](fixtures/SOURCES.md) |
@@ -29,7 +29,7 @@ N/N-1 rule can be checked by reading versions instead of submodule SHAs.
 
   ```xml
   <!-- nuget.config: <add key="zannagh" value="https://nuget.pkg.github.com/zannagh/index.json" /> -->
-  <PackageVersion Include="Blocwerk.Contracts.Compute" Version="0.1.0" />
+  <PackageVersion Include="Blocwerk.Contracts.Compute" Version="0.2.0" />
   ```
 
   ```csharp
@@ -42,7 +42,7 @@ N/N-1 rule can be checked by reading versions instead of submodule SHAs.
 - Python (workers, runners): install the wheel from the GitHub release.
 
   ```text
-  blocwerk-contracts @ https://github.com/zannagh/blocwerk-contracts/releases/download/v0.1.0/blocwerk_contracts-0.1.0-py3-none-any.whl
+  blocwerk-contracts @ https://github.com/zannagh/blocwerk-contracts/releases/download/v0.2.0/blocwerk_contracts-0.2.0-py3-none-any.whl
   ```
 
   ```python

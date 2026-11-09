@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blocwerk.app/contracts/jobs/recognition/texture-match-request.schema.json",
+  "title": "TextureMatchRequest",
+  "description": "The 'request' part of a 'texture-match' job (runner protocol 1.2; parts 'photo', 'texture' and optionally 'mask', one image each): the arguments of IPhotoTextureSession.Match. One facet per job. The photo is decoded without its EXIF orientation.",
+  "type": "object",
+  "required": ["version", "textureMmPerPx"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "textureMmPerPx": {"type": "number", "exclusiveMinimum": 0},
+    "seed": {
+      "type": ["array", "null"],
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"type": "number"},
+      "description": "Predicted photo px to texture px homography, row-major 3x3; absent runs the coarse search."
+    },
+    "attempt": {
+      "type": ["object", "null"],
+      "required": ["ransacSeed", "scaleJitter"],
+      "properties": {
+        "ransacSeed": {"type": "integer"},
+        "coarsePass": {"type": ["integer", "null"]},
+        "scaleJitter": {"type": "number"}
+      },
+      "description": "PhotoTextureAttempt: which deterministic variant to run; absent is {0, null, 1}.",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

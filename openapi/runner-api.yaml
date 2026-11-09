@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Blocwerk runner API
-  version: "1.1"
+  version: "1.2"
   summary: The pull API between the Blocwerk app and its 3D/compute runners.
   description: |
     A runner connects OUT to the app with its `bwr_` key, says hello, long-polls for work, downloads its claimed
@@ -11,8 +11,10 @@ info:
     job is over for good or went back to the queue).
 
     Describes blocwerk `src/Blocwerk.Web/Endpoints/RunnerApiEndpoints*.cs`: runner protocol 1.0 as on `main`, plus the
-    additive 1.1 kinds `splat-prepare` / `splat-finish` (merged to `staging-o7`, PRs #239/#240).
-    Not mapped at all when the server runs with `RUNNERS__MODE=off`. See docs/protocol.md for the job lifecycle,
+    additive 1.1 kinds `splat-prepare` / `splat-finish` (merged to `staging-o7`, PRs #239/#240), plus the additive 1.2
+    recognition kinds (`detect-holds@2`, `outline-holds`, `markers`, `match-panels`, `presence`, `texture-match`) and
+    `GET /api/runners/models/{sha256}`. Mapped whenever recognition is on; `RUNNERS__MODE=off` then only stops the 3D
+    kinds being offered. See docs/protocol.md for the job lifecycle,
     per-kind bundles and results, and docs/versioning.md for compatibility rules.
   license:
     name: AGPL-3.0-or-later
@@ -86,7 +88,8 @@ paths:
       operationId: downloadBundle
       summary: Download the claimed job's input (a zip; Range requests supported).
       description: |
-        The zip layout depends on the claim's `kind` (schemas/layouts). A bundle missing on the server fails the
+        The zip layout depends on the claim's `kind` (schemas/layouts); the 1.2 recognition kinds use the runner
+        envelope with `service: "recognition"` (schemas/envelope/parts). A bundle missing on the server fails the
         job at once (`410` with reason `over`). Check `bundleBytes` and `bundleSha256` from the claim.
       parameters:
         - $ref: "#/components/parameters/JobId"
@@ -118,6 +121,50 @@ paths:
           $ref: "#/components/responses/NotYours"
         "410":
           $ref: "#/components/responses/Gone"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/runners/models/{sha256}:
+    get:
+      tags: [session]
+      operationId: downloadModel
+      summary: Download a recognition model by hash (runner protocol 1.2; Range requests supported).
+      description: |
+        The model named by a `detect-holds@2` request (`model.sha256`), served from the server's models mount. A runner
+        fetches it once and caches it; a runner whose cached hash differs fetches again. Check the SHA-256 of the
+        download against the path. Not tied to a claimed job, so it needs only the runner's key. `404` when the server
+        has no such model.
+      parameters:
+        - name: sha256
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[0-9a-f]{64}$"
+        - name: Range
+          in: header
+          required: false
+          schema:
+            type: string
+          example: bytes=1048576-
+      responses:
+        "200":
+          description: The whole model.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                contentMediaType: application/octet-stream
+        "206":
+          description: The requested range.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                contentMediaType: application/octet-stream
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: The server has no model with this hash (no body).
         "429":
           $ref: "#/components/responses/TooManyRequests"
   /api/runners/jobs/{jobId}/progress:
@@ -190,6 +237,12 @@ paths:
         | `register-panels` | JSON, schemas/jobs/register-panels/panels-result | 4 MiB |
         | `splat-prepare` (1.1) | runner envelope result zip, schemas/layouts/envelope-result | `MaxBundleBytes` + 576 MiB |
         | `splat-finish` (1.1) | runner envelope result zip, schemas/layouts/envelope-result | `RUNNERS__MAXRESULTMB` (2 GiB) |
+        | `detect-holds@2` (1.2) | envelope result zip holding only `status.json`; its `result` is schemas/jobs/detect-holds/holds-result | 64 MiB (the zip) |
+        | `outline-holds` (1.2) | envelope result zip holding only `status.json`; its `result` is schemas/jobs/recognition/outline-result | 16 MiB (the zip) |
+        | `markers` (1.2) | envelope result zip holding only `status.json`; its `result` is schemas/jobs/recognition/markers-result | 4 MiB (the zip) |
+        | `match-panels` (1.2) | envelope result zip holding only `status.json`; its `result` is schemas/jobs/recognition/match-result | 4 MiB (the zip) |
+        | `presence` (1.2) | envelope result zip holding only `status.json`; its `result` is schemas/jobs/recognition/presence-result | 1 MiB (the zip) |
+        | `texture-match` (1.2) | envelope result zip holding only `status.json`; its `result` is schemas/jobs/recognition/texture-match-result | 4 MiB (the zip) |
 
         `Content-Encoding: gzip` is decoded while streaming (the cap counts decoded bytes; a body that inflates past a
         sane ratio is stopped). Slower than 16 KiB/s after 30 s, or longer than the upload deadline, ends the upload.
